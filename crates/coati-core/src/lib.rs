@@ -1,3 +1,6 @@
+pub mod ipc;
+pub use ipc::{Request, Response, ShellContext};
+
 pub mod tool;
 pub use tool::{Tool, ToolError, ToolRegistry};
 

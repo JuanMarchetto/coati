@@ -1,22 +1,9 @@
 use async_trait::async_trait;
 use futures::future::BoxFuture;
-use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
-#[derive(Deserialize, Serialize, Debug)]
-#[serde(tag = "type", rename_all = "snake_case")]
-pub enum Request {
-    Ask { question: String },
-    Ping,
-}
-
-#[derive(Deserialize, Serialize, Debug)]
-#[serde(tag = "type", rename_all = "snake_case")]
-pub enum Response {
-    Answer { content: String },
-    Pong,
-    Error { message: String },
-}
+#[allow(unused_imports)]
+pub use coati_core::ipc::{Request, Response, ShellContext};
 
 /// Handles an incoming Request, returns a Response. Shared handler used by all transports.
 pub type RequestHandler =

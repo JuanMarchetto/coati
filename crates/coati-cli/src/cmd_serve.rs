@@ -49,6 +49,9 @@ pub async fn run(socket_path: &str) -> anyhow::Result<()> {
                             message: e.to_string(),
                         },
                     },
+                    Request::Propose { .. } | Request::Explain { .. } => Response::Error {
+                        message: "not implemented yet".into(),
+                    },
                 }
             })
         })
