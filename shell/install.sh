@@ -68,3 +68,12 @@ fi
 
 echo "✓ appended coati source line to $RC"
 echo "  run:  . \"$RC\"   (or restart your terminal)"
+
+# Desktop app is optional.
+if command -v coati-desktop >/dev/null 2>&1; then
+  echo "Desktop app detected at $(command -v coati-desktop)."
+else
+  echo ""
+  echo "Optional: install the desktop app with:"
+  echo "  cargo build -p coati-desktop --release --features desktop && ./scripts/install-desktop.sh"
+fi

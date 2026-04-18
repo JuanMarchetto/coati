@@ -45,4 +45,35 @@ No such file or directory: /nonexistent does not exist.
 Try: find / -name nonexistent 2>/dev/null
 ```
 
+## Desktop (optional)
+
+Coati ships an optional Tauri tray app. The CLI and shell plugins work
+without it — install only if you want a chat window.
+
+**Prereqs (Ubuntu/Debian):**
+
+```
+sudo apt install libwebkit2gtk-4.1-dev libsoup-3.0-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
+```
+
+**Install:**
+
+```
+cargo build -p coati-desktop --release --features desktop
+./scripts/install-desktop.sh
+```
+
+**Run:**
+
+```
+coati-desktop &
+```
+
+**Features:**
+- Tray icon with Open Chat / Settings / Quit
+- Global hotkey (default Ctrl+Space) — configurable at `~/.config/coati/config.toml`
+- Streaming chat via local Unix socket (same daemon the CLI uses)
+- Conversation history at `~/.local/share/coati/history.db`
+- Confirm-before-sudo for `PROPOSE:` commands from the model
+
 See [CLAUDE.md](CLAUDE.md) for product vision and [ROADMAP.md](ROADMAP.md) for the build plan.
