@@ -16,5 +16,8 @@ pub use llm::{ChatMessage, LlmProvider, LlmResponse, LlmToolCall, OllamaClient};
 pub mod config;
 pub use config::{Config, LlmConfig, ToolsConfig};
 
+pub mod agent_ext;
+pub use agent_ext::{Proposal, Explanation, propose, explain};
+
 #[cfg(target_os = "linux")]
 pub use system::LinuxJournalLogProvider;

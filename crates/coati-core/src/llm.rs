@@ -1,6 +1,7 @@
 use anyhow::Context;
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
+use std::any::Any;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ChatMessage {
@@ -21,12 +22,14 @@ pub struct LlmToolCall {
 }
 
 #[async_trait]
-pub trait LlmProvider: Send + Sync {
+pub trait LlmProvider: Send + Sync + Any {
     async fn complete(
         &self,
         messages: &[ChatMessage],
         tools: &[(&'static str, &'static str, serde_json::Value)],
     ) -> anyhow::Result<LlmResponse>;
+
+    fn as_any(&self) -> &dyn Any;
 }
 
 pub struct OllamaClient {
@@ -69,6 +72,8 @@ impl OllamaClient {
 
 #[async_trait]
 impl LlmProvider for OllamaClient {
+    fn as_any(&self) -> &dyn Any { self }
+
     async fn complete(
         &self,
         messages: &[ChatMessage],

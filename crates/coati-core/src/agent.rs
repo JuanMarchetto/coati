@@ -63,6 +63,8 @@ mod tests {
 
     #[async_trait]
     impl LlmProvider for ScriptedLlm {
+        fn as_any(&self) -> &dyn std::any::Any { self }
+
         async fn complete(
             &self,
             _messages: &[ChatMessage],
