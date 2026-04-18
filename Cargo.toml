@@ -7,7 +7,7 @@ version = "0.0.1"
 edition = "2021"
 rust-version = "1.82"
 license = "Apache-2.0"
-repository = "https://github.com/juanpatriciomarchetto/coati"
+repository = "https://github.com/JuanMarchetto/coati"
 authors = ["Juan Patricio Marchetto <juanpatriciomarchetto@gmail.com>"]
 
 [workspace.dependencies]
