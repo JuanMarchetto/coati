@@ -1,6 +1,7 @@
 use clap::{Parser, Subcommand};
 
 mod cmd_ask;
+mod cmd_model;
 mod cmd_serve;
 mod ipc;
 
@@ -23,6 +24,25 @@ enum Commands {
         #[arg(long, default_value = "~/.cache/coati/agent.sock")]
         socket: String,
     },
+    /// Manage LLM models.
+    Model {
+        #[command(subcommand)]
+        action: ModelAction,
+    },
+}
+
+#[derive(Subcommand)]
+enum ModelAction {
+    /// List models installed in ollama
+    List,
+    /// Pull a model via ollama
+    Pull { name: String },
+    /// Set the active model in config
+    Set { name: String },
+    /// Show hardware-based recommendations
+    Recommend,
+    /// Benchmark the currently-configured model
+    Benchmark,
 }
 
 #[tokio::main]
@@ -37,5 +57,12 @@ async fn main() -> anyhow::Result<()> {
     match cli.command {
         Commands::Ask { question } => cmd_ask::run(question).await,
         Commands::Serve { socket } => cmd_serve::run(&socket).await,
+        Commands::Model { action } => match action {
+            ModelAction::List => cmd_model::list().await,
+            ModelAction::Pull { name } => cmd_model::pull(&name).await,
+            ModelAction::Set { name } => cmd_model::set(&name),
+            ModelAction::Recommend => cmd_model::recommend_cmd(),
+            ModelAction::Benchmark => cmd_model::benchmark().await,
+        },
     }
 }
