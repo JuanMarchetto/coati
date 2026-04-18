@@ -44,11 +44,46 @@ impl Default for DesktopConfig {
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
+pub struct VoiceConfig {
+    #[serde(default)]
+    pub enabled: bool,
+    #[serde(default = "default_voice_hotkey")]
+    pub hotkey: String,
+    #[serde(default = "default_voice_model")]
+    pub model: String,
+    #[serde(default = "default_voice_language")]
+    pub language: String,
+}
+
+fn default_voice_hotkey() -> String {
+    "F9".into()
+}
+fn default_voice_model() -> String {
+    "base.en".into()
+}
+fn default_voice_language() -> String {
+    "en".into()
+}
+
+impl Default for VoiceConfig {
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            hotkey: default_voice_hotkey(),
+            model: default_voice_model(),
+            language: default_voice_language(),
+        }
+    }
+}
+
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Config {
     pub llm: LlmConfig,
     pub tools: ToolsConfig,
     #[serde(default)]
     pub desktop: Option<DesktopConfig>,
+    #[serde(default)]
+    pub voice: Option<VoiceConfig>,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
@@ -85,6 +120,7 @@ impl Default for Config {
                 .collect(),
             },
             desktop: Some(DesktopConfig::default()),
+            voice: Some(VoiceConfig::default()),
         }
     }
 }
@@ -193,5 +229,36 @@ mod tests {
         assert_eq!(d.window_width, 480);
         assert_eq!(d.window_height, 640);
         assert!(d.history_enabled);
+    }
+
+    #[test]
+    fn parses_voice_section() {
+        let toml_str = r#"
+            [llm]
+            provider = "ollama"
+            endpoint = "http://localhost:11434"
+            model = "gemma4"
+            [tools]
+            enabled = ["exec"]
+            [voice]
+            enabled = true
+            hotkey = "F9"
+            model = "base.en"
+            language = "en"
+        "#;
+        let c: Config = toml::from_str(toml_str).unwrap();
+        let v = c.voice.expect("voice section");
+        assert_eq!(v.hotkey, "F9");
+        assert_eq!(v.model, "base.en");
+        assert_eq!(v.language, "en");
+        assert!(v.enabled);
+    }
+
+    #[test]
+    fn default_voice_is_disabled_but_sane() {
+        let v = VoiceConfig::default();
+        assert!(!v.enabled, "voice must be opt-in");
+        assert_eq!(v.hotkey, "F9");
+        assert_eq!(v.model, "base.en");
     }
 }

@@ -1,0 +1,27 @@
+[package]
+name = "coati-voice"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+serde = { workspace = true }
+serde_json = { workspace = true }
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "stream"] }
+tokio = { workspace = true }
+futures-util = "0.3"
+sha2 = "0.10"
+hound = "3.5"
+cpal = "0.15"
+whisper-rs = "0.13"
+dirs = "5"
+
+[dev-dependencies]
+tempfile = "3"
+wiremock = "0.5.22"
