@@ -2,8 +2,10 @@
 
 use coati_core::config::Config;
 use coati_desktop::AppState;
+use tauri::Manager;
 
 mod commands;
+mod shortcut;
 mod stream;
 mod tray;
 
@@ -27,6 +29,16 @@ fn main() {
         ])
         .setup(|app| {
             tray::init(app.handle())?;
+            let hotkey = {
+                let state = app.state::<AppState>();
+                state.hotkey.clone()
+            };
+            if let Err(e) = shortcut::register(app.handle(), &hotkey) {
+                tracing::warn!(
+                    "failed to register hotkey {hotkey}: {e}; falling back to Ctrl+Space"
+                );
+                let _ = shortcut::register(app.handle(), "Ctrl+Space");
+            }
             Ok(())
         })
         .run(tauri::generate_context!())
