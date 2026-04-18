@@ -82,12 +82,18 @@ pub async fn set_settings(_state: State<'_, AppState>, _settings: Settings) -> R
 #[tauri::command]
 pub async fn run_proposal(
     _state: State<'_, AppState>,
-    _command: String,
-    _confirmed: bool,
+    command: String,
+    confirmed: bool,
 ) -> Result<RunResult, String> {
+    if coati_desktop::proposal::needs_sudo(&command) && !confirmed {
+        return Err("sudo command not confirmed".into());
+    }
+    let r = coati_desktop::proposal::run_confirmed(&command)
+        .await
+        .map_err(|e| e.to_string())?;
     Ok(RunResult {
-        stdout: String::new(),
-        stderr: String::new(),
-        exit_code: 0,
+        stdout: r.stdout,
+        stderr: r.stderr,
+        exit_code: r.exit_code,
     })
 }

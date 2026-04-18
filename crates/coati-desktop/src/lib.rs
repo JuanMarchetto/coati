@@ -5,6 +5,7 @@ use coati_core::config::Config;
 use serde::{Deserialize, Serialize};
 
 pub mod ollama;
+pub mod proposal;
 
 pub struct AppState {
     pub hotkey: String,
