@@ -1,6 +1,7 @@
 use clap::{Parser, Subcommand};
 
 mod cmd_ask;
+mod cmd_hw;
 mod cmd_model;
 mod cmd_serve;
 mod ipc;
@@ -24,6 +25,8 @@ enum Commands {
         #[arg(long, default_value = "~/.cache/coati/agent.sock")]
         socket: String,
     },
+    /// Print detected hardware and model recommendations.
+    Hw,
     /// Manage LLM models.
     Model {
         #[command(subcommand)]
@@ -56,6 +59,7 @@ async fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
     match cli.command {
         Commands::Ask { question } => cmd_ask::run(question).await,
+        Commands::Hw => cmd_hw::run(),
         Commands::Serve { socket } => cmd_serve::run(&socket).await,
         Commands::Model { action } => match action {
             ModelAction::List => cmd_model::list().await,
