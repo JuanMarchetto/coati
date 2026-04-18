@@ -16,6 +16,15 @@
         "visible": false,
         "resizable": true,
         "decorations": true
+      },
+      {
+        "title": "Coati Settings",
+        "label": "settings",
+        "url": "settings.html",
+        "width": 420,
+        "height": 320,
+        "visible": false,
+        "resizable": false
       }
     ],
     "security": {

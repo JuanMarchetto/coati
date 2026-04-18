@@ -2,7 +2,7 @@
 
 use coati_core::config::Config;
 use coati_desktop::AppState;
-use tauri::Manager;
+use tauri::{Listener, Manager};
 
 mod commands;
 mod shortcut;
@@ -39,6 +39,13 @@ fn main() {
                 );
                 let _ = shortcut::register(app.handle(), "Ctrl+Space");
             }
+            let app_for_listen = app.handle().clone();
+            app.listen_any("coati://open-settings", move |_ev| {
+                if let Some(w) = app_for_listen.get_webview_window("settings") {
+                    let _ = w.show();
+                    let _ = w.set_focus();
+                }
+            });
             Ok(())
         })
         .run(tauri::generate_context!())

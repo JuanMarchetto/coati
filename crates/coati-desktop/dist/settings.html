@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Coati Settings</title>
+    <link rel="stylesheet" href="app.css" />
+  </head>
+  <body class="settings">
+    <header><span class="wordmark">Settings</span></header>
+    <form id="settings-form">
+      <label>Hotkey <input type="text" id="hotkey" value="Ctrl+Space" /></label>
+      <label>Theme <input type="text" id="theme" value="coati" /></label>
+      <label>Window width <input type="number" id="window_width" min="320" max="1600" value="480" /></label>
+      <label>Window height <input type="number" id="window_height" min="400" max="1600" value="640" /></label>
+      <button type="submit">Save</button>
+      <p class="hint">Restart Coati to apply hotkey changes.</p>
+    </form>
+    <script src="settings.js"></script>
+  </body>
+</html>

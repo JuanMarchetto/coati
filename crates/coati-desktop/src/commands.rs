@@ -75,7 +75,20 @@ pub async fn get_settings(state: State<'_, AppState>) -> Result<Settings, String
 }
 
 #[tauri::command]
-pub async fn set_settings(_state: State<'_, AppState>, _settings: Settings) -> Result<(), String> {
+pub async fn set_settings(state: State<'_, AppState>, settings: Settings) -> Result<(), String> {
+    let mut cfg = (*state.config).clone();
+    cfg.desktop = Some(coati_core::config::DesktopConfig {
+        hotkey: settings.hotkey,
+        theme: settings.theme,
+        window_width: settings.window_width,
+        window_height: settings.window_height,
+        history_enabled: cfg
+            .desktop
+            .as_ref()
+            .map(|d| d.history_enabled)
+            .unwrap_or(true),
+    });
+    cfg.save().map_err(|e| e.to_string())?;
     Ok(())
 }
 
