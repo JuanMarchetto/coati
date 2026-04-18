@@ -2,9 +2,53 @@ use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
+pub struct DesktopConfig {
+    #[serde(default = "default_hotkey")]
+    pub hotkey: String,
+    #[serde(default = "default_theme")]
+    pub theme: String,
+    #[serde(default = "default_window_width")]
+    pub window_width: u32,
+    #[serde(default = "default_window_height")]
+    pub window_height: u32,
+    #[serde(default = "default_true")]
+    pub history_enabled: bool,
+}
+
+fn default_hotkey() -> String {
+    "Ctrl+Space".into()
+}
+fn default_theme() -> String {
+    "coati".into()
+}
+fn default_window_width() -> u32 {
+    480
+}
+fn default_window_height() -> u32 {
+    640
+}
+fn default_true() -> bool {
+    true
+}
+
+impl Default for DesktopConfig {
+    fn default() -> Self {
+        Self {
+            hotkey: default_hotkey(),
+            theme: default_theme(),
+            window_width: default_window_width(),
+            window_height: default_window_height(),
+            history_enabled: default_true(),
+        }
+    }
+}
+
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Config {
     pub llm: LlmConfig,
     pub tools: ToolsConfig,
+    #[serde(default)]
+    pub desktop: Option<DesktopConfig>,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
@@ -40,6 +84,7 @@ impl Default for Config {
                 .map(String::from)
                 .collect(),
             },
+            desktop: Some(DesktopConfig::default()),
         }
     }
 }
@@ -116,5 +161,37 @@ mod tests {
         let parsed: Config = toml::from_str(&s).unwrap();
         assert_eq!(parsed.llm.model, c.llm.model);
         assert_eq!(parsed.tools.enabled, c.tools.enabled);
+    }
+
+    #[test]
+    fn parses_desktop_section() {
+        let toml_str = r#"
+            [llm]
+            provider = "ollama"
+            endpoint = "http://localhost:11434"
+            model = "gemma4"
+            [tools]
+            enabled = ["exec"]
+            [desktop]
+            hotkey = "Ctrl+Alt+Space"
+            theme = "coati"
+            window_width = 520
+            window_height = 700
+            history_enabled = true
+        "#;
+        let c: Config = toml::from_str(toml_str).unwrap();
+        let d = c.desktop.expect("desktop section");
+        assert_eq!(d.hotkey, "Ctrl+Alt+Space");
+        assert_eq!(d.window_width, 520);
+        assert!(d.history_enabled);
+    }
+
+    #[test]
+    fn default_desktop_is_sensible() {
+        let d = DesktopConfig::default();
+        assert_eq!(d.hotkey, "Ctrl+Space");
+        assert_eq!(d.window_width, 480);
+        assert_eq!(d.window_height, 640);
+        assert!(d.history_enabled);
     }
 }
