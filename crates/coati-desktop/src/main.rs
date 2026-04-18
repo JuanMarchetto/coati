@@ -4,6 +4,7 @@ use coati_core::config::Config;
 use coati_desktop::AppState;
 
 mod commands;
+mod stream;
 
 fn main() {
     tracing_subscriber::fmt::init();

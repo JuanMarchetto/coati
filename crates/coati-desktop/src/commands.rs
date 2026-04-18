@@ -52,11 +52,15 @@ pub async fn create_conversation(
 
 #[tauri::command]
 pub async fn send_stream(
-    _state: State<'_, AppState>,
-    _question: String,
-    _conversation_id: Option<String>,
+    state: State<'_, AppState>,
+    app: tauri::AppHandle,
+    question: String,
+    conversation_id: Option<String>,
 ) -> Result<(), String> {
-    Ok(())
+    let sock = state.socket_path.clone();
+    crate::stream::send_and_stream(&sock, app, question, conversation_id)
+        .await
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
