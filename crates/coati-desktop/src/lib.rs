@@ -64,7 +64,7 @@ pub struct RunResult {
     pub exit_code: i32,
 }
 
-pub async fn list_conversations_from(
+pub fn list_conversations_from(
     repo: &coati_core::history::HistoryRepo,
     limit: u32,
 ) -> Result<Vec<ConvRow>, String> {
@@ -111,13 +111,13 @@ mod lib_tests {
         assert!(s.contains("\"id\":\"a\""));
     }
 
-    #[tokio::test]
-    async fn list_conversations_returns_rows_from_history() {
+    #[test]
+    fn list_conversations_returns_rows_from_history() {
         use coati_core::history::HistoryRepo;
         let dir = TempDir::new().unwrap();
         let repo = HistoryRepo::open(&dir.path().join("h.db")).unwrap();
         repo.create_conversation("first", "gemma4").unwrap();
-        let rows = list_conversations_from(&repo, 10).await.unwrap();
+        let rows = list_conversations_from(&repo, 10).unwrap();
         assert_eq!(rows.len(), 1);
         assert_eq!(rows[0].title, "first");
     }

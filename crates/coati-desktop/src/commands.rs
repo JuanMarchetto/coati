@@ -17,7 +17,7 @@ pub async fn list_models(state: State<'_, AppState>) -> Result<Vec<ModelInfo>, S
 #[tauri::command]
 pub async fn list_conversations(_state: State<'_, AppState>) -> Result<Vec<ConvRow>, String> {
     let repo = coati_core::history::HistoryRepo::open_default().map_err(|e| e.to_string())?;
-    coati_desktop::list_conversations_from(&repo, 50).await
+    coati_desktop::list_conversations_from(&repo, 50)
 }
 
 #[tauri::command]
@@ -27,14 +27,16 @@ pub async fn load_conversation(
 ) -> Result<Vec<MsgRow>, String> {
     let repo = coati_core::history::HistoryRepo::open_default().map_err(|e| e.to_string())?;
     let ms = repo.messages(&id).map_err(|e| e.to_string())?;
-    Ok(ms
+    let result = ms
         .into_iter()
         .map(|m| MsgRow {
             role: m.role,
             content: m.content,
             created_at: m.created_at,
         })
-        .collect())
+        .collect();
+    drop(repo);
+    Ok(result)
 }
 
 #[tauri::command]
@@ -44,10 +46,12 @@ pub async fn create_conversation(
 ) -> Result<String, String> {
     let repo = coati_core::history::HistoryRepo::open_default().map_err(|e| e.to_string())?;
     let model = state.config.llm.model.clone();
-    let conv = repo
+    let conv_id = repo
         .create_conversation(&title, &model)
-        .map_err(|e| e.to_string())?;
-    Ok(conv.id)
+        .map_err(|e| e.to_string())?
+        .id;
+    drop(repo);
+    Ok(conv_id)
 }
 
 #[tauri::command]
