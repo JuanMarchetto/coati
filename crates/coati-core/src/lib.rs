@@ -1,6 +1,9 @@
 pub mod tool;
 pub use tool::{Tool, ToolError, ToolRegistry};
 
+pub mod agent;
+pub use agent::Agent;
+
 pub mod system;
 pub use system::{SystemLogProvider, SystemLogError, is_valid_unit_name};
 
