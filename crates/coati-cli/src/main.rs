@@ -1,6 +1,7 @@
 use clap::{Parser, Subcommand};
 
 mod cmd_ask;
+mod cmd_explain;
 mod cmd_hw;
 mod cmd_model;
 mod cmd_propose;
@@ -57,6 +58,15 @@ enum Commands {
         #[arg(long)]
         context: Option<String>,
     },
+    /// Explain why a command failed, with an optional fix.
+    Explain {
+        #[arg(long)] command: String,
+        #[arg(long, default_value = "")] stdout: String,
+        #[arg(long, default_value = "")] stderr: String,
+        #[arg(long)] exit: i32,
+        #[arg(long)] json: bool,
+        #[arg(long)] context: Option<String>,
+    },
 }
 
 #[derive(Subcommand)]
@@ -97,5 +107,7 @@ async fn main() -> anyhow::Result<()> {
             cmd_setup::run(reconfigure, yes, model).await,
         Commands::Propose { intent, json, context } =>
             cmd_propose::run(&intent, json, context.as_deref()).await,
+        Commands::Explain { command, stdout, stderr, exit, json, context } =>
+            cmd_explain::run(&command, &stdout, &stderr, exit, json, context.as_deref()).await,
     }
 }
