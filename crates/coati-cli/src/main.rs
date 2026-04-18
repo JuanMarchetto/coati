@@ -3,6 +3,7 @@ use clap::{Parser, Subcommand};
 mod cmd_ask;
 mod cmd_hw;
 mod cmd_model;
+mod cmd_propose;
 mod cmd_serve;
 mod cmd_setup;
 mod ipc;
@@ -45,6 +46,17 @@ enum Commands {
         #[arg(long)]
         model: Option<String>,
     },
+    /// Propose a shell command for a natural-language intent.
+    Propose {
+        /// The intent, e.g. "restart nginx"
+        intent: String,
+        /// Emit machine-readable JSON instead of human text.
+        #[arg(long)]
+        json: bool,
+        /// Pre-captured shell context as JSON (overrides auto-detection).
+        #[arg(long)]
+        context: Option<String>,
+    },
 }
 
 #[derive(Subcommand)]
@@ -83,5 +95,7 @@ async fn main() -> anyhow::Result<()> {
         },
         Commands::Setup { reconfigure, yes, model } =>
             cmd_setup::run(reconfigure, yes, model).await,
+        Commands::Propose { intent, json, context } =>
+            cmd_propose::run(&intent, json, context.as_deref()).await,
     }
 }
