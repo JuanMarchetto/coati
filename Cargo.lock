@@ -502,6 +502,7 @@ dependencies = [
  "anyhow",
  "async-trait",
  "dirs 5.0.1",
+ "futures-util",
  "reqwest",
  "schemars",
  "serde",

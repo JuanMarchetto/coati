@@ -1,5 +1,6 @@
 use anyhow::Context;
 use async_trait::async_trait;
+use futures_util::StreamExt;
 use serde::{Deserialize, Serialize};
 use std::any::Any;
 
@@ -77,6 +78,72 @@ impl OllamaClient {
         let parsed: serde_json::Value = serde_json::from_str(&content)
             .with_context(|| format!("llm returned non-json: {content}"))?;
         Ok(parsed)
+    }
+
+    pub async fn complete_stream<F>(
+        &self,
+        messages: Vec<ChatMessage>,
+        mut on_chunk: F,
+    ) -> anyhow::Result<String>
+    where
+        F: FnMut(&str),
+    {
+        #[derive(serde::Serialize)]
+        struct Req<'a> {
+            model: &'a str,
+            messages: &'a [ChatMessage],
+            stream: bool,
+        }
+        #[derive(serde::Deserialize)]
+        struct Line {
+            message: Option<Msg>,
+            done: bool,
+        }
+        #[derive(serde::Deserialize)]
+        struct Msg {
+            content: String,
+        }
+
+        let url = format!("{}/api/chat", self.base_url);
+        let req = Req {
+            model: &self.model,
+            messages: &messages,
+            stream: true,
+        };
+        let resp = self
+            .http
+            .post(url)
+            .json(&req)
+            .send()
+            .await?
+            .error_for_status()?;
+
+        let mut stream = resp.bytes_stream();
+        let mut buf: Vec<u8> = Vec::new();
+        let mut full = String::new();
+
+        while let Some(chunk) = stream.next().await {
+            let bytes = chunk?;
+            buf.extend_from_slice(&bytes);
+            while let Some(pos) = buf.iter().position(|&b| b == b'\n') {
+                let line = buf.drain(..=pos).collect::<Vec<u8>>();
+                let line = std::str::from_utf8(&line[..line.len() - 1])?.trim();
+                if line.is_empty() {
+                    continue;
+                }
+                let parsed: Line = serde_json::from_str(line)?;
+                if let Some(m) = parsed.message {
+                    if !m.content.is_empty() {
+                        on_chunk(&m.content);
+                        full.push_str(&m.content);
+                    }
+                }
+                if parsed.done {
+                    return Ok(full);
+                }
+            }
+        }
+        Ok(full)
     }
 }
 
@@ -269,5 +336,44 @@ mod tests {
 
         assert_eq!(resp.tool_calls.len(), 1);
         assert_eq!(resp.tool_calls[0].name, "read_file");
+    }
+}
+
+#[cfg(test)]
+mod stream_tests {
+    use super::*;
+    use wiremock::matchers::{method, path};
+    use wiremock::{Mock, MockServer, ResponseTemplate};
+
+    #[tokio::test]
+    async fn streams_chunks_until_done() {
+        let server = MockServer::start().await;
+        let body = concat!(
+            r#"{"message":{"role":"assistant","content":"hel"},"done":false}"#,
+            "\n",
+            r#"{"message":{"role":"assistant","content":"lo"},"done":false}"#,
+            "\n",
+            r#"{"message":{"role":"assistant","content":""},"done":true}"#,
+            "\n",
+        );
+        Mock::given(method("POST"))
+            .and(path("/api/chat"))
+            .respond_with(ResponseTemplate::new(200).set_body_string(body))
+            .mount(&server)
+            .await;
+
+        let client = OllamaClient::new(server.uri(), "gemma4".into());
+        let msg = ChatMessage {
+            role: "user".into(),
+            content: "hi".into(),
+        };
+        let mut chunks = vec![];
+        let full = client
+            .complete_stream(vec![msg], |c| chunks.push(c.to_string()))
+            .await
+            .unwrap();
+
+        assert_eq!(chunks, vec!["hel", "lo"]);
+        assert_eq!(full, "hello");
     }
 }
