@@ -5,6 +5,7 @@ use coati_desktop::AppState;
 
 mod commands;
 mod stream;
+mod tray;
 
 fn main() {
     tracing_subscriber::fmt::init();
@@ -24,8 +25,8 @@ fn main() {
             commands::get_settings,
             commands::set_settings,
         ])
-        .setup(|_app| {
-            // window + tray + shortcut wiring lands in later tasks
+        .setup(|app| {
+            tray::init(app.handle())?;
             Ok(())
         })
         .run(tauri::generate_context!())
