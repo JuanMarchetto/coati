@@ -11,10 +11,15 @@ authors.workspace = true
 name = "coati"
 path = "src/main.rs"
 
+[features]
+default = []
+voice = ["dep:coati-voice"]
+
 [dependencies]
 coati-core = { path = "../coati-core" }
 coati-tools = { path = "../coati-tools" }
 coati-hw = { path = "../coati-hw" }
+coati-voice = { path = "../coati-voice", optional = true }
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
 clap.workspace = true
 tokio.workspace = true
@@ -27,6 +32,7 @@ async-trait = "0.1"
 futures = "0.3"
 shellexpand = "3"
 inquire = "0.7"
+hound = "3.5"
 
 [dev-dependencies]
 assert_cmd = "=2.0.14"

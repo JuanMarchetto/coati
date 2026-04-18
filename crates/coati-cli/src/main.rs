@@ -8,6 +8,8 @@ mod cmd_propose;
 mod cmd_serve;
 mod cmd_setup;
 mod ipc;
+#[cfg(feature = "voice")]
+mod cmd_voice;
 
 #[derive(Parser)]
 #[command(name = "coati", version, about = "Your Linux copilot.")]
@@ -73,6 +75,30 @@ enum Commands {
         #[arg(long)]
         context: Option<String>,
     },
+    /// Voice commands (requires --features voice at build time).
+    #[cfg(feature = "voice")]
+    Voice {
+        #[command(subcommand)]
+        action: VoiceAction,
+    },
+}
+
+#[cfg(feature = "voice")]
+#[derive(Subcommand)]
+enum VoiceAction {
+    /// Download and install a whisper model.
+    Setup {
+        #[arg(long, default_value = "base.en")]
+        model: String,
+        #[arg(long, short = 'y')]
+        yes: bool,
+    },
+    /// Transcribe a 16kHz mono WAV file and print the text.
+    Transcribe {
+        path: std::path::PathBuf,
+        #[arg(long, default_value = "base.en")]
+        model: String,
+    },
 }
 
 #[derive(Subcommand)]
@@ -127,5 +153,10 @@ async fn main() -> anyhow::Result<()> {
             json,
             context,
         } => cmd_explain::run(&command, &stdout, &stderr, exit, json, context.as_deref()).await,
+        #[cfg(feature = "voice")]
+        Commands::Voice { action } => match action {
+            VoiceAction::Setup { model, yes } => cmd_voice::setup(&model, yes).await,
+            VoiceAction::Transcribe { path, model } => cmd_voice::transcribe_file(&path, &model).await,
+        },
     }
 }
