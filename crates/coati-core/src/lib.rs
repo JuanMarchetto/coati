@@ -19,5 +19,8 @@ pub use config::{Config, LlmConfig, ToolsConfig};
 pub mod agent_ext;
 pub use agent_ext::{explain, propose, Explanation, Proposal};
 
+pub mod history;
+pub use history::{Conversation, HistoryRepo, Message};
+
 #[cfg(target_os = "linux")]
 pub use system::LinuxJournalLogProvider;
