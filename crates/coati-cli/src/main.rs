@@ -2,6 +2,7 @@ use clap::{Parser, Subcommand};
 
 mod cmd_ask;
 mod cmd_serve;
+mod ipc;
 
 #[derive(Parser)]
 #[command(name = "coati", version, about = "Your Linux copilot.")]
