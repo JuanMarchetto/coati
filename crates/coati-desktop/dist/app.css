@@ -100,3 +100,20 @@ header {
 .proposal-actions button { padding: 4px 12px; font-family: 'Plex Mono'; cursor: pointer; }
 .btn-no { background: var(--surface); color: var(--cream); border: 1px solid var(--dim); }
 .btn-yes { background: var(--forest); color: var(--ink); border: none; }
+
+#layout { display: flex; height: 100%; }
+#sidebar {
+  width: 160px;
+  border-right: 1px solid var(--surface);
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  gap: 8px;
+}
+.sidebar-head { padding: 6px 4px; }
+#new-conv { background: var(--forest); color: var(--ink); border: none; padding: 6px; font-family: 'Plex Mono'; cursor: pointer; border-radius: 4px; }
+#conv-list { list-style: none; overflow-y: auto; flex: 1; }
+#conv-list li { padding: 6px; cursor: pointer; border-radius: 4px; font-size: 12px; color: var(--dim); }
+#conv-list li:hover { background: var(--surface); color: var(--cream); }
+#conv-list li.active { background: var(--terracotta); color: var(--ink); }
+main { flex: 1; display: flex; flex-direction: column; }

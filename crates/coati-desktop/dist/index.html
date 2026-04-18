@@ -6,14 +6,24 @@
     <link rel="stylesheet" href="app.css" />
   </head>
   <body>
-    <header>
-      <span class="wordmark">Coati</span>
-      <select id="model" class="model-select"></select>
-    </header>
-    <div id="messages"></div>
-    <div id="input-row">
-      <textarea id="input" rows="2" placeholder="Ask coati something..."></textarea>
-      <button id="send">Send</button>
+    <div id="layout">
+      <aside id="sidebar">
+        <div class="sidebar-head">
+          <span class="wordmark">Coati</span>
+        </div>
+        <button id="new-conv">+ New</button>
+        <ul id="conv-list"></ul>
+      </aside>
+      <main>
+        <header>
+          <select id="model" class="model-select"></select>
+        </header>
+        <div id="messages"></div>
+        <div id="input-row">
+          <textarea id="input" rows="2" placeholder="Ask coati something..."></textarea>
+          <button id="send">Send</button>
+        </div>
+      </main>
     </div>
     <script src="app.js"></script>
   </body>

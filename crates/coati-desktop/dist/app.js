@@ -72,6 +72,7 @@ async function send() {
 
   if (!conversationId) {
     conversationId = await invoke("create_conversation", { title: q.slice(0, 40) });
+    await refreshConversations();
   }
 
   addMessage("user", q);
@@ -104,6 +105,9 @@ async function boot() {
     }
   });
 
+  document.getElementById("new-conv").onclick = newConversation;
+  await refreshConversations();
+
   await listen("coati://chunk", (ev) => {
     if (!currentAssistantEl) return;
     currentAssistantText += ev.payload;
@@ -129,6 +133,35 @@ async function boot() {
       currentAssistantEl = null;
     }
   });
+}
+
+async function refreshConversations() {
+  const list = document.getElementById("conv-list");
+  clear(list);
+  const rows = await invoke("list_conversations");
+  for (const c of rows) {
+    const li = el("li", null, c.title);
+    if (c.id === conversationId) li.classList.add("active");
+    li.onclick = () => loadConversation(c.id);
+    list.appendChild(li);
+  }
+}
+
+async function loadConversation(id) {
+  const msgs = document.getElementById("messages");
+  clear(msgs);
+  conversationId = id;
+  const rows = await invoke("load_conversation", { id });
+  for (const r of rows) {
+    addMessage(r.role, r.content);
+  }
+  refreshConversations();
+}
+
+function newConversation() {
+  conversationId = null;
+  clear(document.getElementById("messages"));
+  refreshConversations();
 }
 
 document.addEventListener("DOMContentLoaded", boot);
