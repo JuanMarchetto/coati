@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/coati-core", "crates/coati-tools", "crates/coati-cli", "crates/coati-hw"]
+members = ["crates/coati-core", "crates/coati-tools", "crates/coati-cli", "crates/coati-hw", "crates/coati-desktop"]
 
 [workspace.package]
 version = "0.0.1"
@@ -21,3 +21,8 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 anyhow = "1.0"
 rig-core = "0.35"
+rusqlite = { version = "0.32", features = ["bundled"] }
+uuid = { version = "1.11", features = ["v4"] }
+tauri = { version = "2.1", features = ["tray-icon"] }
+tauri-build = "2.0"
+tauri-plugin-global-shortcut = "2.0"
