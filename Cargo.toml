@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/coati-core", "crates/coati-tools", "crates/coati-cli"]
+members = ["crates/coati-core", "crates/coati-tools", "crates/coati-cli", "crates/coati-hw"]
 
 [workspace.package]
 version = "0.0.1"
