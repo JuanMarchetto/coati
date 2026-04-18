@@ -26,3 +26,27 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y bats zsh
       - name: Run shell tests
         run: ./shell/tests/run.sh
+
+  desktop:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install system deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libsoup-3.0-dev \
+            libgtk-3-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            libssl-dev \
+            pkg-config
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: "1.82"
+      - uses: Swatinem/rust-cache@v2
+      - name: Build coati-desktop
+        run: cargo build -p coati-desktop --release --features desktop
+      - name: Run coati-desktop tests
+        run: cargo test -p coati-desktop --features desktop
