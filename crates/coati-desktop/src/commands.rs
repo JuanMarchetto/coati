@@ -1,52 +1,53 @@
-use serde::{Deserialize, Serialize};
 use tauri::State;
 
-use coati_desktop::AppState;
-
-#[derive(Serialize)]
-pub struct ModelInfo {
-    pub name: String,
-    pub size: u64,
-}
+use coati_desktop::{AppState, ConvRow, ModelInfo, MsgRow, RunResult, Settings};
 
 #[tauri::command]
-pub async fn list_models(_state: State<'_, AppState>) -> Result<Vec<ModelInfo>, String> {
-    Ok(vec![])
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct ConvRow {
-    pub id: String,
-    pub title: String,
-    pub updated_at: i64,
+pub async fn list_models(state: State<'_, AppState>) -> Result<Vec<ModelInfo>, String> {
+    let endpoint = state.config.llm.endpoint.clone();
+    let models = coati_desktop::ollama::list_installed(&endpoint)
+        .await
+        .map_err(|e| e.to_string())?;
+    Ok(models
+        .into_iter()
+        .map(|(name, size)| ModelInfo { name, size })
+        .collect())
 }
 
 #[tauri::command]
 pub async fn list_conversations(_state: State<'_, AppState>) -> Result<Vec<ConvRow>, String> {
-    Ok(vec![])
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct MsgRow {
-    pub role: String,
-    pub content: String,
-    pub created_at: i64,
+    let repo = coati_core::history::HistoryRepo::open_default().map_err(|e| e.to_string())?;
+    coati_desktop::list_conversations_from(&repo, 50).await
 }
 
 #[tauri::command]
 pub async fn load_conversation(
     _state: State<'_, AppState>,
-    _id: String,
+    id: String,
 ) -> Result<Vec<MsgRow>, String> {
-    Ok(vec![])
+    let repo = coati_core::history::HistoryRepo::open_default().map_err(|e| e.to_string())?;
+    let ms = repo.messages(&id).map_err(|e| e.to_string())?;
+    Ok(ms
+        .into_iter()
+        .map(|m| MsgRow {
+            role: m.role,
+            content: m.content,
+            created_at: m.created_at,
+        })
+        .collect())
 }
 
 #[tauri::command]
 pub async fn create_conversation(
-    _state: State<'_, AppState>,
-    _title: String,
+    state: State<'_, AppState>,
+    title: String,
 ) -> Result<String, String> {
-    Ok(String::new())
+    let repo = coati_core::history::HistoryRepo::open_default().map_err(|e| e.to_string())?;
+    let model = state.config.llm.model.clone();
+    let conv = repo
+        .create_conversation(&title, &model)
+        .map_err(|e| e.to_string())?;
+    Ok(conv.id)
 }
 
 #[tauri::command]
@@ -56,14 +57,6 @@ pub async fn send_stream(
     _conversation_id: Option<String>,
 ) -> Result<(), String> {
     Ok(())
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct Settings {
-    pub hotkey: String,
-    pub theme: String,
-    pub window_width: u32,
-    pub window_height: u32,
 }
 
 #[tauri::command]
@@ -80,13 +73,6 @@ pub async fn get_settings(state: State<'_, AppState>) -> Result<Settings, String
 #[tauri::command]
 pub async fn set_settings(_state: State<'_, AppState>, _settings: Settings) -> Result<(), String> {
     Ok(())
-}
-
-#[derive(Serialize)]
-pub struct RunResult {
-    pub stdout: String,
-    pub stderr: String,
-    pub exit_code: i32,
 }
 
 #[tauri::command]

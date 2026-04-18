@@ -535,14 +535,17 @@ dependencies = [
  "anyhow",
  "coati-core",
  "dirs 5.0.1",
+ "reqwest",
  "serde",
  "serde_json",
  "tauri",
  "tauri-build",
  "tauri-plugin-global-shortcut",
+ "tempfile",
  "tokio",
  "tracing",
  "tracing-subscriber",
+ "wiremock",
 ]
 
 [[package]]
