@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>coati — brand preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #1A130E;   /* warm ink */
+    --bg-2:      #211812;
+    --surface:   #2A1F16;
+    --line:      #3A2B1F;
+    --terra:     #E67347;   /* terracotta */
+    --terra-dim: #B35532;
+    --forest:    #6AA07F;   /* forest green accent */
+    --cream:     #F5ECD8;
+    --cream-2:   #E8DCC2;
+    --dim:       #8C7F6F;
+    --warn:      #E6B04D;
+    --err:       #E66B6B;
+    --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sans: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+    --serif: 'IBM Plex Serif', Georgia, serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); color: var(--cream); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+  body { padding: 64px 48px 120px; max-width: 1120px; margin: 0 auto; }
+
+  nav.top {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-bottom: 32px; border-bottom: 1px solid var(--line);
+  }
+  nav.top .mark { display: flex; align-items: center; gap: 12px; }
+  nav.top .dot { width: 8px; height: 8px; background: var(--terra); border-radius: 50%; box-shadow: 0 0 14px var(--terra); }
+  nav.top .label { font-family: var(--mono); font-weight: 700; letter-spacing: -0.02em; }
+  nav.top small { color: var(--dim); font-family: var(--mono); font-size: 12px; }
+
+  section { padding: 72px 0; border-bottom: 1px solid var(--line); }
+  section:last-of-type { border: 0; }
+
+  .eyebrow {
+    font-family: var(--mono); font-size: 12px; color: var(--terra);
+    letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 14px;
+  }
+  h2 {
+    font-family: var(--mono); font-size: 28px; font-weight: 700;
+    letter-spacing: -0.02em; margin-bottom: 32px; color: var(--cream);
+  }
+
+  /* Hero wordmark */
+  .hero { padding-top: 24px; display: grid; grid-template-columns: 1fr auto; gap: 32px; align-items: end; }
+  .hero .left { min-width: 0; }
+  .hero .wordmark {
+    font-family: var(--serif); font-weight: 700; font-style: italic;
+    font-size: clamp(96px, 17vw, 200px);
+    letter-spacing: -0.04em; line-height: 0.92; color: var(--cream);
+    display: inline-flex; align-items: baseline;
+  }
+  .hero .wordmark .dot { color: var(--terra); }
+  .hero .tag {
+    font-family: var(--mono); color: var(--dim); margin-top: 28px; font-size: 16px; max-width: 640px; line-height: 1.6;
+  }
+  .hero .tag b { color: var(--cream); font-weight: 500; }
+  .hero .pills { margin-top: 28px; display: flex; gap: 10px; flex-wrap: wrap; }
+  .pill {
+    font-family: var(--mono); font-size: 11px; color: var(--cream);
+    background: var(--surface); border: 1px solid var(--line);
+    padding: 6px 12px; border-radius: 999px;
+  }
+  .pill .k { color: var(--terra); margin-right: 4px; }
+  .hero .big-icon {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 28px;
+    padding: 32px; display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Color palette */
+  .swatches { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+  .swatch {
+    border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface);
+  }
+  .swatch .fill { height: 92px; }
+  .swatch .meta { padding: 10px 12px; font-family: var(--mono); font-size: 11px; }
+  .swatch .name { color: var(--cream); font-weight: 600; }
+  .swatch .hex { color: var(--dim); display: block; margin-top: 2px; }
+
+  /* Icons */
+  .icons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; align-items: end; }
+  .icon-card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+    padding: 26px; display: flex; flex-direction: column; align-items: center; gap: 14px;
+  }
+  .icon-card .size { font-family: var(--mono); font-size: 11px; color: var(--dim); }
+  .iconmark { display: block; }
+
+  /* Type specimen */
+  .spec { display: grid; grid-template-columns: 220px 1fr; gap: 40px; align-items: start; }
+  .spec .key { font-family: var(--mono); font-size: 12px; color: var(--dim); padding-top: 8px; line-height: 1.5; }
+  .spec .val { color: var(--cream); }
+  .spec + .spec { margin-top: 32px; padding-top: 32px; border-top: 1px dashed var(--line); }
+  .display-xl { font-family: var(--serif); font-style: italic; font-size: 56px; font-weight: 700; letter-spacing: -0.03em; line-height: 1; }
+  .display-l  { font-family: var(--mono); font-size: 30px; font-weight: 700; letter-spacing: -0.02em; }
+  .body-m     { font-family: var(--sans); font-size: 16px; font-weight: 400; line-height: 1.6; color: var(--cream); }
+  .caption    { font-family: var(--mono); font-size: 12px; font-weight: 500; letter-spacing: 0.08em; color: var(--dim); text-transform: uppercase; }
+
+  /* Terminal mock */
+  .term {
+    background: #120C08; border: 1px solid var(--line); border-radius: 12px; overflow: hidden;
+    font-family: var(--mono); font-size: 14px; line-height: 1.7;
+  }
+  .term .bar { padding: 10px 14px; background: var(--surface); display: flex; gap: 6px; align-items: center; border-bottom: 1px solid var(--line); }
+  .term .bar .b { width: 12px; height: 12px; border-radius: 50%; background: #3A2B1F; }
+  .term .bar .title { color: var(--dim); font-size: 11px; margin-left: 10px; font-family: var(--mono); }
+  .term .body { padding: 22px 24px; color: var(--cream-2); }
+  .term .prompt { color: var(--terra); }
+  .term .user { color: var(--cream); }
+  .term .ai { color: var(--dim); }
+  .term .ai b { color: var(--cream); font-weight: 500; }
+  .term .ok { color: var(--forest); }
+  .term .warn { color: var(--warn); }
+
+  /* Voice samples */
+  .voice { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .voice-card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+    padding: 24px;
+  }
+  .voice-card .tag {
+    font-family: var(--mono); font-size: 11px; color: var(--terra);
+    text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 10px;
+  }
+  .voice-card .line { font-family: var(--serif); font-style: italic; font-size: 19px; color: var(--cream); line-height: 1.45; }
+  .voice-card .sub { color: var(--dim); font-family: var(--sans); font-size: 13px; margin-top: 10px; }
+
+  /* Footer */
+  footer { padding: 40px 0 0; color: var(--dim); font-family: var(--mono); font-size: 12px; display: flex; justify-content: space-between; }
+  footer a { color: var(--terra); text-decoration: none; }
+
+  @media (max-width: 860px) {
+    .hero { grid-template-columns: 1fr; }
+    .hero .big-icon { justify-self: start; }
+  }
+  @media (max-width: 780px) {
+    body { padding: 32px 20px 80px; }
+    .swatches { grid-template-columns: repeat(2, 1fr); }
+    .icons { grid-template-columns: repeat(2, 1fr); }
+    .spec { grid-template-columns: 1fr; gap: 8px; }
+    .voice { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!--
+  Coati logo SVG — reused at multiple sizes.
+  Design: stylized profile of a coati with its distinctive long upturned snout
+  terminating in a magnifying-glass circle — "the curious agent investigating your system".
+  The ringed tail curls to form a subtle terminal prompt shape.
+-->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <symbol id="coati" viewBox="0 0 128 128">
+      <!-- rounded tile background -->
+      <rect width="128" height="128" rx="28" fill="#2A1F16"/>
+      <!-- body silhouette -->
+      <path d="M28 90
+               C 28 72, 40 62, 58 62
+               L 84 62
+               C 94 62, 100 70, 100 82
+               L 100 96
+               C 100 102, 96 106, 90 106
+               L 40 106
+               C 32 106, 28 100, 28 90 Z"
+            fill="#E67347"/>
+      <!-- face mask (darker band) -->
+      <path d="M56 64 C 62 58, 78 58, 84 64 L 84 74 C 78 78, 62 78, 56 74 Z" fill="#1A130E" opacity="0.35"/>
+      <!-- long snout extending up-forward -->
+      <path d="M82 66
+               C 90 58, 98 46, 104 36
+               C 106 32, 108 30, 112 30"
+            stroke="#E67347" stroke-width="10" stroke-linecap="round" fill="none"/>
+      <!-- magnifying glass at snout tip -->
+      <circle cx="114" cy="28" r="9" fill="none" stroke="#F5ECD8" stroke-width="3.5"/>
+      <line x1="120" y1="34" x2="124" y2="38" stroke="#F5ECD8" stroke-width="3.5" stroke-linecap="round"/>
+      <!-- eye -->
+      <circle cx="70" cy="70" r="2.8" fill="#1A130E"/>
+      <!-- ringed tail curl, hinting at terminal prompt -->
+      <path d="M28 90
+               C 14 90, 10 76, 18 64
+               C 24 54, 36 52, 42 58"
+            stroke="#6AA07F" stroke-width="6" stroke-linecap="round" fill="none"/>
+      <!-- tail rings -->
+      <line x1="16" y1="82" x2="22" y2="80" stroke="#1A130E" stroke-width="2"/>
+      <line x1="14" y1="76" x2="20" y2="74" stroke="#1A130E" stroke-width="2"/>
+      <line x1="16" y1="70" x2="22" y2="68" stroke="#1A130E" stroke-width="2"/>
+    </symbol>
+  </defs>
+</svg>
+
+<nav class="top">
+  <div class="mark">
+    <span class="dot"></span>
+    <span class="label">coati</span>
+    <small>v0.0 — brand preview</small>
+  </div>
+  <small>local · private · voice-ready</small>
+</nav>
+
+<section class="hero">
+  <div class="left">
+    <div class="eyebrow">wordmark</div>
+    <div class="wordmark">
+      <span>coati<span class="dot">.</span></span>
+    </div>
+    <div class="tag"><b>Your Linux copilot.</b> A curious, private, voice-capable agent that pokes around your system so you don't have to. Runs local, ships as one installer.</div>
+    <div class="pills">
+      <span class="pill"><span class="k">$</span>shell</span>
+      <span class="pill"><span class="k">▢</span>desktop chat</span>
+      <span class="pill"><span class="k">◉</span>voice</span>
+      <span class="pill"><span class="k">⚙</span>system agent</span>
+      <span class="pill"><span class="k">+</span>plugins</span>
+    </div>
+  </div>
+  <div class="big-icon">
+    <svg width="200" height="200"><use href="#coati"/></svg>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow">palette</div>
+  <h2>colors</h2>
+  <div class="swatches">
+    <div class="swatch">
+      <div class="fill" style="background:#E67347"></div>
+      <div class="meta"><span class="name">terracotta</span><span class="hex">#E67347 · primary</span></div>
+    </div>
+    <div class="swatch">
+      <div class="fill" style="background:#6AA07F"></div>
+      <div class="meta"><span class="name">forest</span><span class="hex">#6AA07F · accent</span></div>
+    </div>
+    <div class="swatch">
+      <div class="fill" style="background:#1A130E"></div>
+      <div class="meta"><span class="name">warm ink</span><span class="hex">#1A130E · bg</span></div>
+    </div>
+    <div class="swatch">
+      <div class="fill" style="background:#2A1F16"></div>
+      <div class="meta"><span class="name">surface</span><span class="hex">#2A1F16 · cards</span></div>
+    </div>
+    <div class="swatch">
+      <div class="fill" style="background:#F5ECD8"></div>
+      <div class="meta"><span class="name">cream</span><span class="hex">#F5ECD8 · text</span></div>
+    </div>
+    <div class="swatch">
+      <div class="fill" style="background:#8C7F6F"></div>
+      <div class="meta"><span class="name">dim</span><span class="hex">#8C7F6F · muted</span></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow">iconmark</div>
+  <h2>icon at scale</h2>
+  <div class="icons">
+    <div class="icon-card">
+      <svg width="128" height="128"><use href="#coati"/></svg>
+      <span class="size">128 px</span>
+    </div>
+    <div class="icon-card">
+      <svg width="64" height="64"><use href="#coati"/></svg>
+      <span class="size">64 px</span>
+    </div>
+    <div class="icon-card">
+      <svg width="32" height="32"><use href="#coati"/></svg>
+      <span class="size">32 px</span>
+    </div>
+    <div class="icon-card">
+      <svg width="16" height="16"><use href="#coati"/></svg>
+      <span class="size">16 px (tray)</span>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow">typography</div>
+  <h2>type system</h2>
+
+  <div class="spec">
+    <div class="key">IBM Plex Serif<br>Italic / 700<br>— wordmark</div>
+    <div class="val display-xl">coati.</div>
+  </div>
+  <div class="spec">
+    <div class="key">IBM Plex Mono<br>Bold / 700<br>— UI titles & code</div>
+    <div class="val display-l">$ coati fix nginx</div>
+  </div>
+  <div class="spec">
+    <div class="key">IBM Plex Sans<br>Regular / 400<br>— body copy</div>
+    <div class="val body-m">A local, private, voice-capable system agent for Linux. Shipped as one installer, not a distro. Works on Ubuntu, Fedora, and Arch — wherever your terminal already lives.</div>
+  </div>
+  <div class="spec">
+    <div class="key">IBM Plex Mono<br>Medium / 500<br>— captions</div>
+    <div class="val caption">runs local · 0 telemetry · open source · confirm before sudo</div>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow">in situ</div>
+  <h2>shell in the wild</h2>
+  <div class="term">
+    <div class="bar">
+      <span class="b"></span><span class="b"></span><span class="b"></span>
+      <span class="title">~/projects/api — coati v0.0</span>
+    </div>
+    <div class="body">
+<span class="prompt">&gt;</span> <span class="user">why is nginx 502'ing?</span><br>
+<span class="ai">coati · sniffing around <b>/var/log/nginx/error.log</b> (last 50 lines)</span><br>
+<span class="ai">coati · found: <b>connect() failed (111: Connection refused)</b> → upstream unix:/tmp/app.sock</span><br>
+<span class="ai">coati · checking <b>systemctl status app.service</b></span><br>
+<span class="warn">app.service inactive (dead) since 14:22 · last exit code 1</span><br>
+<span class="ai">propose: <b>sudo systemctl restart app</b> — confirm? [y/N]</span> <span class="prompt">_</span>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow">voice</div>
+  <h2>how coati talks</h2>
+  <div class="voice">
+    <div class="voice-card">
+      <div class="tag">curious · helpful</div>
+      <div class="line">"systemd unit is dead — want me to restart it?"</div>
+      <div class="sub">Direct. One sentence. Waits for a nod before touching anything.</div>
+    </div>
+    <div class="voice-card">
+      <div class="tag">honest about limits</div>
+      <div class="line">"that command needs sudo — I can't run it myself."</div>
+      <div class="sub">Never pretends to have privileges it doesn't have.</div>
+    </div>
+    <div class="voice-card">
+      <div class="tag">a little wry</div>
+      <div class="line">"your disk is 97% full. this is not a drill."</div>
+      <div class="sub">Good sysadmin energy, not chatbot energy.</div>
+    </div>
+    <div class="voice-card">
+      <div class="tag">quiet by default</div>
+      <div class="line">"done."</div>
+      <div class="sub">When the action speaks for itself, coati shuts up.</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>coati — brand v0.0 · 2026</span>
+  <span><a href="#">coati.sh</a> · @coati_sh</span>
+</footer>
+
+</body>
+</html>
