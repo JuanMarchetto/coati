@@ -9,3 +9,6 @@ pub use list_dir::ListDirTool;
 
 pub mod query_logs;
 pub use query_logs::QueryLogsTool;
+
+pub mod explain_error;
+pub use explain_error::ExplainErrorTool;
