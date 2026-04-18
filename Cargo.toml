@@ -20,4 +20,4 @@ thiserror = "1.0"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 anyhow = "1.0"
-rig-core = "0.7"
+rig-core = "0.35"
