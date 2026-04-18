@@ -4,6 +4,7 @@ mod cmd_ask;
 mod cmd_hw;
 mod cmd_model;
 mod cmd_serve;
+mod cmd_setup;
 mod ipc;
 
 #[derive(Parser)]
@@ -31,6 +32,18 @@ enum Commands {
     Model {
         #[command(subcommand)]
         action: ModelAction,
+    },
+    /// First-run TUI: detect hardware, pick a model, pull it, write config.
+    Setup {
+        /// Reset existing config and start over.
+        #[arg(long)]
+        reconfigure: bool,
+        /// Skip prompts; pick the top recommended model.
+        #[arg(long)]
+        yes: bool,
+        /// Override the model choice entirely (skips the picker).
+        #[arg(long)]
+        model: Option<String>,
     },
 }
 
@@ -68,5 +81,7 @@ async fn main() -> anyhow::Result<()> {
             ModelAction::Recommend => cmd_model::recommend_cmd(),
             ModelAction::Benchmark => cmd_model::benchmark().await,
         },
+        Commands::Setup { reconfigure, yes, model } =>
+            cmd_setup::run(reconfigure, yes, model).await,
     }
 }
