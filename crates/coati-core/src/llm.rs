@@ -47,23 +47,26 @@ impl LlmProvider for OllamaClient {
         messages: &[ChatMessage],
         tools: &[(&'static str, &'static str, serde_json::Value)],
     ) -> anyhow::Result<LlmResponse> {
-        let tools_json: Vec<_> = tools.iter().map(|(name, desc, schema)| {
-            serde_json::json!({
-                "type": "function",
-                "function": {
-                    "name": name,
-                    "description": desc,
-                    "parameters": schema,
-                }
-            })
-        }).collect();
-
-        let body = serde_json::json!({
+        let mut body = serde_json::json!({
             "model": self.model,
             "messages": messages,
-            "tools": tools_json,
             "stream": false,
         });
+        // Only include the `tools` field when there are tools to send.
+        // Sending an empty array confuses some models (e.g. gemma3 returns 400).
+        if !tools.is_empty() {
+            let tools_json: Vec<_> = tools.iter().map(|(name, desc, schema)| {
+                serde_json::json!({
+                    "type": "function",
+                    "function": {
+                        "name": name,
+                        "description": desc,
+                        "parameters": schema,
+                    }
+                })
+            }).collect();
+            body.as_object_mut().unwrap().insert("tools".into(), serde_json::Value::Array(tools_json));
+        }
 
         let resp: serde_json::Value = self.http
             .post(format!("{}/api/chat", self.base_url))
@@ -108,6 +111,51 @@ mod tests {
 
         assert_eq!(resp.content, "hi");
         assert!(resp.tool_calls.is_empty());
+    }
+
+    #[tokio::test]
+    async fn omits_tools_field_when_empty() {
+        use std::sync::{Arc, Mutex};
+        use wiremock::{Mock, MockServer, Request, ResponseTemplate};
+        use wiremock::matchers::{method, path};
+
+        // Custom matcher that captures the request body for later inspection.
+        #[derive(Clone)]
+        struct BodyCapture(Arc<Mutex<Option<serde_json::Value>>>);
+
+        impl wiremock::Match for BodyCapture {
+            fn matches(&self, req: &Request) -> bool {
+                if let Ok(v) = serde_json::from_slice::<serde_json::Value>(&req.body) {
+                    *self.0.lock().unwrap() = Some(v);
+                }
+                true // always match; we assert after the call
+            }
+        }
+
+        let server = MockServer::start().await;
+        let captured: Arc<Mutex<Option<serde_json::Value>>> = Arc::new(Mutex::new(None));
+        let capture_matcher = BodyCapture(Arc::clone(&captured));
+
+        Mock::given(method("POST"))
+            .and(path("/api/chat"))
+            .and(capture_matcher)
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "message": { "role": "assistant", "content": "ok" },
+                "done": true
+            })))
+            .mount(&server)
+            .await;
+
+        let client = OllamaClient::new(server.uri(), "gemma4".into());
+        let msg = ChatMessage { role: "user".into(), content: "hello".into() };
+        let resp = client.complete(&[msg], &[]).await.unwrap();
+        assert_eq!(resp.content, "ok");
+
+        let body = captured.lock().unwrap().clone().expect("body should have been captured");
+        assert!(
+            !body.as_object().unwrap().contains_key("tools"),
+            "tools key must be absent when tools slice is empty, got: {body}"
+        );
     }
 
     #[tokio::test]

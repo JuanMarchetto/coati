@@ -26,7 +26,7 @@ impl Default for Config {
             llm: LlmConfig {
                 provider: "ollama".into(),
                 endpoint: "http://localhost:11434".into(),
-                model: "gemma3".into(),
+                model: "gemma4".into(),
             },
             tools: ToolsConfig {
                 enabled: vec!["exec", "read_file", "list_dir", "query_logs", "explain_error"]

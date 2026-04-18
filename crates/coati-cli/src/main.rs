@@ -72,13 +72,13 @@ async fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
     match cli.command {
         Commands::Ask { question } => cmd_ask::run(question).await,
-        Commands::Hw => cmd_hw::run(),
+        Commands::Hw => cmd_hw::run().await,
         Commands::Serve { socket } => cmd_serve::run(&socket).await,
         Commands::Model { action } => match action {
             ModelAction::List => cmd_model::list().await,
             ModelAction::Pull { name } => cmd_model::pull(&name).await,
             ModelAction::Set { name } => cmd_model::set(&name),
-            ModelAction::Recommend => cmd_model::recommend_cmd(),
+            ModelAction::Recommend => cmd_model::recommend_cmd().await,
             ModelAction::Benchmark => cmd_model::benchmark().await,
         },
         Commands::Setup { reconfigure, yes, model } =>

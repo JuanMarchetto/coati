@@ -1,6 +1,36 @@
 use coati_core::Config;
 use coati_hw::{detect, recommend};
 
+/// Fetch the list of model names currently installed in the local ollama instance.
+/// Returns an empty Vec on any error so callers can gracefully degrade.
+async fn list_installed_models(endpoint: &str) -> Vec<String> {
+    let client = reqwest::Client::new();
+    match client.get(format!("{}/api/tags", endpoint)).send().await {
+        Ok(r) if r.status().is_success() => match r.json::<serde_json::Value>().await {
+            Ok(v) => v["models"]
+                .as_array()
+                .cloned()
+                .unwrap_or_default()
+                .iter()
+                .filter_map(|m| m["name"].as_str().map(str::to_string))
+                .collect(),
+            Err(_) => vec![],
+        },
+        _ => vec![],
+    }
+}
+
+/// Heuristic: a recommendation is considered "installed" if any installed model name
+/// either exactly matches the rec's name, or the rec's base name (the part before ':')
+/// is a prefix of the installed model's name. This means `gemma3:latest` matches
+/// recommendations for `gemma3:4b`, `gemma3:9b-q4`, etc.
+fn is_installed(rec_name: &str, installed: &[String]) -> bool {
+    let rec_base = rec_name.split(':').next().unwrap_or(rec_name);
+    installed
+        .iter()
+        .any(|n| n == rec_name || n.starts_with(rec_base))
+}
+
 pub async fn list() -> anyhow::Result<()> {
     let cfg = Config::load_or_default()?;
     let resp: serde_json::Value = reqwest::Client::new()
@@ -35,7 +65,10 @@ pub fn set(name: &str) -> anyhow::Result<()> {
     Ok(())
 }
 
-pub fn recommend_cmd() -> anyhow::Result<()> {
+pub async fn recommend_cmd() -> anyhow::Result<()> {
+    let cfg = Config::load_or_default()?;
+    let installed = list_installed_models(&cfg.llm.endpoint).await;
+
     let hw = detect();
     println!("Hardware detected:");
     println!(
@@ -64,7 +97,12 @@ pub fn recommend_cmd() -> anyhow::Result<()> {
     println!("Recommended models:");
     for rec in recommend(&hw).iter().take(6) {
         let marker = if rec.fits { "  \u{2605}" } else { "  \u{2717}" };
-        println!("{} {:24} \u{2014} {}", marker, rec.model, rec.reason);
+        let installed_tag = if is_installed(&rec.model, &installed) {
+            " [installed] "
+        } else {
+            "             "
+        };
+        println!("{} {:24}{}\u{2014} {}", marker, rec.model, installed_tag, rec.reason);
     }
     Ok(())
 }
