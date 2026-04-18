@@ -1,3 +1,4 @@
+use anyhow::Context;
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 
@@ -37,6 +38,32 @@ pub struct OllamaClient {
 impl OllamaClient {
     pub fn new(base_url: String, model: String) -> Self {
         Self { base_url, model, http: reqwest::Client::new() }
+    }
+
+    /// Like complete() but forces format: json (or a provided schema) and parses
+    /// the assistant content as JSON. Returns the parsed Value.
+    pub async fn complete_json(
+        &self,
+        messages: &[ChatMessage],
+        schema: Option<serde_json::Value>,
+    ) -> anyhow::Result<serde_json::Value> {
+        let format = schema.unwrap_or_else(|| serde_json::json!("json"));
+        let body = serde_json::json!({
+            "model": self.model,
+            "messages": messages,
+            "format": format,
+            "stream": false,
+        });
+        let resp: serde_json::Value = self.http
+            .post(format!("{}/api/chat", self.base_url))
+            .json(&body)
+            .send().await?
+            .error_for_status()?
+            .json().await?;
+        let content = resp["message"]["content"].as_str().unwrap_or("").to_string();
+        let parsed: serde_json::Value = serde_json::from_str(&content)
+            .with_context(|| format!("llm returned non-json: {content}"))?;
+        Ok(parsed)
     }
 }
 
@@ -156,6 +183,22 @@ mod tests {
             !body.as_object().unwrap().contains_key("tools"),
             "tools key must be absent when tools slice is empty, got: {body}"
         );
+    }
+
+    #[tokio::test]
+    async fn ollama_complete_json_requests_json_format() {
+        let server = MockServer::start().await;
+        Mock::given(method("POST")).and(path("/api/chat"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "message": { "role": "assistant", "content": "{\"k\":\"v\"}" },
+                "done": true
+            })))
+            .mount(&server).await;
+
+        let client = OllamaClient::new(server.uri(), "gemma4".into());
+        let msg = ChatMessage { role: "user".into(), content: "return json".into() };
+        let val: serde_json::Value = client.complete_json(&[msg], None).await.unwrap();
+        assert_eq!(val["k"], "v");
     }
 
     #[tokio::test]
