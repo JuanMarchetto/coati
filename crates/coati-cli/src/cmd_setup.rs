@@ -58,10 +58,7 @@ pub async fn run(
             .ok_or_else(|| anyhow::anyhow!("failed to parse selection"))?
     };
 
-    println!(
-        "\nPulling {} via ollama (this may take a while)...",
-        chosen
-    );
+    println!("\nPulling {} via ollama (this may take a while)...", chosen);
     let status = std::process::Command::new("ollama")
         .args(["pull", &chosen])
         .status()?;

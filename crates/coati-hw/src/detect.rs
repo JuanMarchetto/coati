@@ -1,4 +1,4 @@
-use sysinfo::{System, Disks};
+use sysinfo::{Disks, System};
 
 #[derive(Debug, Clone)]
 pub struct HardwareInfo {
@@ -23,7 +23,11 @@ pub fn detect() -> HardwareInfo {
     let mut sys = System::new_all();
     sys.refresh_all();
 
-    let cpu_model = sys.cpus().first().map(|c| c.brand().to_string()).unwrap_or_default();
+    let cpu_model = sys
+        .cpus()
+        .first()
+        .map(|c| c.brand().to_string())
+        .unwrap_or_default();
     let flags = read_cpu_flags();
 
     HardwareInfo {
@@ -42,12 +46,17 @@ fn disk_free_home() -> u64 {
     let disks = Disks::new_with_refreshed_list();
     let home = std::path::PathBuf::from(std::env::var("HOME").unwrap_or_else(|_| "/".into()));
     // prefer the disk mounted at $HOME, fall back to /
-    disks.iter()
+    disks
+        .iter()
         .find(|d| home.starts_with(d.mount_point()))
         .map(|d| d.available_space())
-        .unwrap_or_else(|| disks.iter().find(|d| d.mount_point() == std::path::Path::new("/"))
-            .map(|d| d.available_space())
-            .unwrap_or(0))
+        .unwrap_or_else(|| {
+            disks
+                .iter()
+                .find(|d| d.mount_point() == std::path::Path::new("/"))
+                .map(|d| d.available_space())
+                .unwrap_or(0)
+        })
 }
 
 #[cfg(target_os = "linux")]
@@ -61,7 +70,9 @@ fn read_cpu_flags() -> String {
 }
 
 #[cfg(not(target_os = "linux"))]
-fn read_cpu_flags() -> String { String::new() }
+fn read_cpu_flags() -> String {
+    String::new()
+}
 
 fn detect_gpus() -> Vec<GpuInfo> {
     let mut gpus = Vec::new();
@@ -73,7 +84,11 @@ fn detect_gpus() -> Vec<GpuInfo> {
                 if let Ok(dev) = nvml.device_by_index(i) {
                     let name = dev.name().unwrap_or_default();
                     let mem = dev.memory_info().map(|m| m.total).unwrap_or(0);
-                    gpus.push(GpuInfo { vendor: "NVIDIA".into(), name, vram_bytes: mem });
+                    gpus.push(GpuInfo {
+                        vendor: "NVIDIA".into(),
+                        name,
+                        vram_bytes: mem,
+                    });
                 }
             }
         }

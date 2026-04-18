@@ -92,7 +92,10 @@ pub async fn recommend_cmd() -> anyhow::Result<()> {
             );
         }
     }
-    println!("  Disk: {} GB free (in $HOME)", hw.disk_free_bytes / 1_073_741_824);
+    println!(
+        "  Disk: {} GB free (in $HOME)",
+        hw.disk_free_bytes / 1_073_741_824
+    );
     println!();
     println!("Recommended models:");
     for rec in recommend(&hw).iter().take(6) {
@@ -102,7 +105,10 @@ pub async fn recommend_cmd() -> anyhow::Result<()> {
         } else {
             "             "
         };
-        println!("{} {:24}{}\u{2014} {}", marker, rec.model, installed_tag, rec.reason);
+        println!(
+            "{} {:24}{}\u{2014} {}",
+            marker, rec.model, installed_tag, rec.reason
+        );
     }
     Ok(())
 }

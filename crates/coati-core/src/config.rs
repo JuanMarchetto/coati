@@ -29,10 +29,16 @@ impl Default for Config {
                 model: "gemma4".into(),
             },
             tools: ToolsConfig {
-                enabled: vec!["exec", "read_file", "list_dir", "query_logs", "explain_error"]
-                    .into_iter()
-                    .map(String::from)
-                    .collect(),
+                enabled: vec![
+                    "exec",
+                    "read_file",
+                    "list_dir",
+                    "query_logs",
+                    "explain_error",
+                ]
+                .into_iter()
+                .map(String::from)
+                .collect(),
             },
         }
     }
@@ -89,8 +95,17 @@ mod tests {
     #[test]
     fn default_has_all_tools_enabled() {
         let c = Config::default();
-        for tool in ["exec", "read_file", "list_dir", "query_logs", "explain_error"] {
-            assert!(c.tools.enabled.contains(&tool.to_string()), "missing: {tool}");
+        for tool in [
+            "exec",
+            "read_file",
+            "list_dir",
+            "query_logs",
+            "explain_error",
+        ] {
+            assert!(
+                c.tools.enabled.contains(&tool.to_string()),
+                "missing: {tool}"
+            );
         }
     }
 

@@ -6,8 +6,7 @@ use std::sync::Arc;
 pub use coati_core::ipc::{Request, Response, ShellContext};
 
 /// Handles an incoming Request, returns a Response. Shared handler used by all transports.
-pub type RequestHandler =
-    Arc<dyn Fn(Request) -> BoxFuture<'static, Response> + Send + Sync>;
+pub type RequestHandler = Arc<dyn Fn(Request) -> BoxFuture<'static, Response> + Send + Sync>;
 
 /// Abstract transport layer so platforms can differ (Unix socket / Windows named pipe / TCP).
 #[async_trait]
@@ -60,8 +59,7 @@ impl IpcTransport for UnixSocketTransport {
                             message: format!("bad request: {e}"),
                         },
                     };
-                    let body =
-                        serde_json::to_string(&resp).unwrap_or_else(|_| "{}".into());
+                    let body = serde_json::to_string(&resp).unwrap_or_else(|_| "{}".into());
                     if wr.write_all(body.as_bytes()).await.is_err() {
                         break;
                     }

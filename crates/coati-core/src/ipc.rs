@@ -18,7 +18,9 @@ pub struct ShellContext {
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum Request {
     Ping,
-    Ask { question: String },
+    Ask {
+        question: String,
+    },
     Propose {
         intent: String,
         #[serde(default)]
@@ -40,7 +42,9 @@ pub enum Request {
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum Response {
     Pong,
-    Answer { content: String },
+    Answer {
+        content: String,
+    },
     Proposal {
         command: String,
         reasoning: String,
@@ -51,7 +55,9 @@ pub enum Response {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         fix: Option<String>,
     },
-    Error { message: String },
+    Error {
+        message: String,
+    },
 }
 
 #[cfg(test)]

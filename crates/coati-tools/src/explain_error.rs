@@ -42,12 +42,18 @@ mod tests {
     #[tokio::test]
     async fn packages_command_output_for_analysis() {
         let tool = ExplainErrorTool;
-        let out = tool.call(serde_json::from_value(json!({
-            "command": "nginx -t",
-            "stdout": "",
-            "stderr": "nginx: [emerg] unknown directive \"worker_connecions\"",
-            "exit_code": 1
-        })).unwrap()).await.unwrap();
+        let out = tool
+            .call(
+                serde_json::from_value(json!({
+                    "command": "nginx -t",
+                    "stdout": "",
+                    "stderr": "nginx: [emerg] unknown directive \"worker_connecions\"",
+                    "exit_code": 1
+                }))
+                .unwrap(),
+            )
+            .await
+            .unwrap();
 
         let s = out["analysis_prompt"].as_str().unwrap();
         assert!(s.contains("nginx -t"));

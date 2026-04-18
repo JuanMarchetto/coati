@@ -8,7 +8,7 @@ pub mod agent;
 pub use agent::Agent;
 
 pub mod system;
-pub use system::{SystemLogProvider, SystemLogError, is_valid_unit_name};
+pub use system::{is_valid_unit_name, SystemLogError, SystemLogProvider};
 
 pub mod llm;
 pub use llm::{ChatMessage, LlmProvider, LlmResponse, LlmToolCall, OllamaClient};
@@ -17,7 +17,7 @@ pub mod config;
 pub use config::{Config, LlmConfig, ToolsConfig};
 
 pub mod agent_ext;
-pub use agent_ext::{Proposal, Explanation, propose, explain};
+pub use agent_ext::{explain, propose, Explanation, Proposal};
 
 #[cfg(target_os = "linux")]
 pub use system::LinuxJournalLogProvider;

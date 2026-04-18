@@ -26,7 +26,8 @@ pub struct ReadFileTool;
 impl Tool for ReadFileTool {
     type Input = ReadFileInput;
     const NAME: &'static str = "read_file";
-    const DESCRIPTION: &'static str = "Read the contents of a file up to max_bytes bytes. Use for logs, configs, source files.";
+    const DESCRIPTION: &'static str =
+        "Read the contents of a file up to max_bytes bytes. Use for logs, configs, source files.";
 
     async fn call(&self, input: ReadFileInput) -> Result<serde_json::Value, ToolError> {
         let mut file = fs::File::open(&input.path)

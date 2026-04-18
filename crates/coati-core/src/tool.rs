@@ -114,10 +114,7 @@ mod tests {
         let mut registry = ToolRegistry::new();
         registry.register(EchoTool);
 
-        let result = registry
-            .call("echo", json!({ "msg": "hi" }))
-            .await
-            .unwrap();
+        let result = registry.call("echo", json!({ "msg": "hi" })).await.unwrap();
 
         assert_eq!(result, json!({ "echoed": "hi" }));
     }

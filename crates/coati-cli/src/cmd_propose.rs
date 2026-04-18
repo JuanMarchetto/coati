@@ -1,11 +1,13 @@
 use coati_core::ipc::ShellContext;
-use coati_core::{Config, OllamaClient, propose};
+use coati_core::{propose, Config, OllamaClient};
 use std::sync::Arc;
 
 pub async fn run(intent: &str, json: bool, context_override: Option<&str>) -> anyhow::Result<()> {
     let cfg = Config::load_or_default()?;
-    let llm: Arc<dyn coati_core::LlmProvider> =
-        Arc::new(OllamaClient::new(cfg.llm.endpoint.clone(), cfg.llm.model.clone()));
+    let llm: Arc<dyn coati_core::LlmProvider> = Arc::new(OllamaClient::new(
+        cfg.llm.endpoint.clone(),
+        cfg.llm.model.clone(),
+    ));
 
     let ctx = if let Some(raw) = context_override {
         serde_json::from_str::<ShellContext>(raw)
@@ -17,11 +19,14 @@ pub async fn run(intent: &str, json: bool, context_override: Option<&str>) -> an
     let p = propose(&llm, intent, &ctx).await?;
 
     if json {
-        println!("{}", serde_json::json!({
-            "command": p.command,
-            "reasoning": p.reasoning,
-            "needs_sudo": p.needs_sudo,
-        }));
+        println!(
+            "{}",
+            serde_json::json!({
+                "command": p.command,
+                "reasoning": p.reasoning,
+                "needs_sudo": p.needs_sudo,
+            })
+        );
     } else {
         if p.needs_sudo {
             println!("⚠ needs sudo");

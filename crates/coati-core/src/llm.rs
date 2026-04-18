@@ -40,7 +40,11 @@ pub struct OllamaClient {
 
 impl OllamaClient {
     pub fn new(base_url: String, model: String) -> Self {
-        Self { base_url, model, http: reqwest::Client::new() }
+        Self {
+            base_url,
+            model,
+            http: reqwest::Client::new(),
+        }
     }
 
     /// Like complete() but forces format: json (or a provided schema) and parses
@@ -57,13 +61,19 @@ impl OllamaClient {
             "format": format,
             "stream": false,
         });
-        let resp: serde_json::Value = self.http
+        let resp: serde_json::Value = self
+            .http
             .post(format!("{}/api/chat", self.base_url))
             .json(&body)
-            .send().await?
+            .send()
+            .await?
             .error_for_status()?
-            .json().await?;
-        let content = resp["message"]["content"].as_str().unwrap_or("").to_string();
+            .json()
+            .await?;
+        let content = resp["message"]["content"]
+            .as_str()
+            .unwrap_or("")
+            .to_string();
         let parsed: serde_json::Value = serde_json::from_str(&content)
             .with_context(|| format!("llm returned non-json: {content}"))?;
         Ok(parsed)
@@ -72,7 +82,9 @@ impl OllamaClient {
 
 #[async_trait]
 impl LlmProvider for OllamaClient {
-    fn as_any(&self) -> &dyn Any { self }
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
 
     async fn complete(
         &self,
@@ -87,35 +99,48 @@ impl LlmProvider for OllamaClient {
         // Only include the `tools` field when there are tools to send.
         // Sending an empty array confuses some models (e.g. gemma3 returns 400).
         if !tools.is_empty() {
-            let tools_json: Vec<_> = tools.iter().map(|(name, desc, schema)| {
-                serde_json::json!({
-                    "type": "function",
-                    "function": {
-                        "name": name,
-                        "description": desc,
-                        "parameters": schema,
-                    }
+            let tools_json: Vec<_> = tools
+                .iter()
+                .map(|(name, desc, schema)| {
+                    serde_json::json!({
+                        "type": "function",
+                        "function": {
+                            "name": name,
+                            "description": desc,
+                            "parameters": schema,
+                        }
+                    })
                 })
-            }).collect();
-            body.as_object_mut().unwrap().insert("tools".into(), serde_json::Value::Array(tools_json));
+                .collect();
+            body.as_object_mut()
+                .unwrap()
+                .insert("tools".into(), serde_json::Value::Array(tools_json));
         }
 
-        let resp: serde_json::Value = self.http
+        let resp: serde_json::Value = self
+            .http
             .post(format!("{}/api/chat", self.base_url))
             .json(&body)
-            .send().await?
+            .send()
+            .await?
             .error_for_status()?
-            .json().await?;
+            .json()
+            .await?;
 
         let msg = &resp["message"];
         let content = msg["content"].as_str().unwrap_or("").to_string();
-        let tool_calls: Vec<LlmToolCall> = msg["tool_calls"].as_array()
-            .cloned().unwrap_or_default()
+        let tool_calls: Vec<LlmToolCall> = msg["tool_calls"]
+            .as_array()
+            .cloned()
+            .unwrap_or_default()
             .into_iter()
             .filter_map(|tc| serde_json::from_value(tc["function"].clone()).ok())
             .collect();
 
-        Ok(LlmResponse { content, tool_calls })
+        Ok(LlmResponse {
+            content,
+            tool_calls,
+        })
     }
 }
 
@@ -138,7 +163,10 @@ mod tests {
             .await;
 
         let client = OllamaClient::new(server.uri(), "gemma3".into());
-        let msg = ChatMessage { role: "user".into(), content: "hey".into() };
+        let msg = ChatMessage {
+            role: "user".into(),
+            content: "hey".into(),
+        };
         let resp = client.complete(&[msg], &[]).await.unwrap();
 
         assert_eq!(resp.content, "hi");
@@ -148,8 +176,8 @@ mod tests {
     #[tokio::test]
     async fn omits_tools_field_when_empty() {
         use std::sync::{Arc, Mutex};
-        use wiremock::{Mock, MockServer, Request, ResponseTemplate};
         use wiremock::matchers::{method, path};
+        use wiremock::{Mock, MockServer, Request, ResponseTemplate};
 
         // Custom matcher that captures the request body for later inspection.
         #[derive(Clone)]
@@ -179,11 +207,18 @@ mod tests {
             .await;
 
         let client = OllamaClient::new(server.uri(), "gemma4".into());
-        let msg = ChatMessage { role: "user".into(), content: "hello".into() };
+        let msg = ChatMessage {
+            role: "user".into(),
+            content: "hello".into(),
+        };
         let resp = client.complete(&[msg], &[]).await.unwrap();
         assert_eq!(resp.content, "ok");
 
-        let body = captured.lock().unwrap().clone().expect("body should have been captured");
+        let body = captured
+            .lock()
+            .unwrap()
+            .clone()
+            .expect("body should have been captured");
         assert!(
             !body.as_object().unwrap().contains_key("tools"),
             "tools key must be absent when tools slice is empty, got: {body}"
@@ -193,15 +228,20 @@ mod tests {
     #[tokio::test]
     async fn ollama_complete_json_requests_json_format() {
         let server = MockServer::start().await;
-        Mock::given(method("POST")).and(path("/api/chat"))
+        Mock::given(method("POST"))
+            .and(path("/api/chat"))
             .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
                 "message": { "role": "assistant", "content": "{\"k\":\"v\"}" },
                 "done": true
             })))
-            .mount(&server).await;
+            .mount(&server)
+            .await;
 
         let client = OllamaClient::new(server.uri(), "gemma4".into());
-        let msg = ChatMessage { role: "user".into(), content: "return json".into() };
+        let msg = ChatMessage {
+            role: "user".into(),
+            content: "return json".into(),
+        };
         let val: serde_json::Value = client.complete_json(&[msg], None).await.unwrap();
         assert_eq!(val["k"], "v");
     }

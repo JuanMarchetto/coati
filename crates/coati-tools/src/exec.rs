@@ -55,10 +55,16 @@ mod tests {
     #[tokio::test]
     async fn exec_runs_simple_command() {
         let tool = ExecTool::default();
-        let out = tool.call(serde_json::from_value(json!({
-            "command": "echo",
-            "args": ["hello"]
-        })).unwrap()).await.unwrap();
+        let out = tool
+            .call(
+                serde_json::from_value(json!({
+                    "command": "echo",
+                    "args": ["hello"]
+                }))
+                .unwrap(),
+            )
+            .await
+            .unwrap();
 
         assert_eq!(out["exit_code"], 0);
         assert!(out["stdout"].as_str().unwrap().contains("hello"));
@@ -67,10 +73,16 @@ mod tests {
     #[tokio::test]
     async fn exec_captures_nonzero_exit() {
         let tool = ExecTool::default();
-        let out = tool.call(serde_json::from_value(json!({
-            "command": "false",
-            "args": []
-        })).unwrap()).await.unwrap();
+        let out = tool
+            .call(
+                serde_json::from_value(json!({
+                    "command": "false",
+                    "args": []
+                }))
+                .unwrap(),
+            )
+            .await
+            .unwrap();
 
         assert_eq!(out["exit_code"], 1);
     }
@@ -79,10 +91,16 @@ mod tests {
     async fn exec_does_not_interpret_shell() {
         let tool = ExecTool::default();
         // If shell interpretation happened, this would expand $HOME. It must not.
-        let out = tool.call(serde_json::from_value(json!({
-            "command": "echo",
-            "args": ["$HOME"]
-        })).unwrap()).await.unwrap();
+        let out = tool
+            .call(
+                serde_json::from_value(json!({
+                    "command": "echo",
+                    "args": ["$HOME"]
+                }))
+                .unwrap(),
+            )
+            .await
+            .unwrap();
 
         assert_eq!(out["stdout"].as_str().unwrap().trim(), "$HOME");
     }
@@ -90,10 +108,15 @@ mod tests {
     #[tokio::test]
     async fn exec_times_out() {
         let tool = ExecTool { timeout_secs: 1 };
-        let result = tool.call(serde_json::from_value(json!({
-            "command": "sleep",
-            "args": ["5"]
-        })).unwrap()).await;
+        let result = tool
+            .call(
+                serde_json::from_value(json!({
+                    "command": "sleep",
+                    "args": ["5"]
+                }))
+                .unwrap(),
+            )
+            .await;
 
         assert!(matches!(result, Err(coati_core::ToolError::Execution(_))));
     }

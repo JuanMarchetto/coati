@@ -1,7 +1,7 @@
+pub mod benchmark;
 pub mod detect;
 pub mod recommend;
-pub mod benchmark;
 
-pub use detect::{HardwareInfo, GpuInfo, detect};
-pub use recommend::{ModelRecommendation, recommend};
-pub use benchmark::{BenchmarkResult, benchmark};
+pub use benchmark::{benchmark, BenchmarkResult};
+pub use detect::{detect, GpuInfo, HardwareInfo};
+pub use recommend::{recommend, ModelRecommendation};

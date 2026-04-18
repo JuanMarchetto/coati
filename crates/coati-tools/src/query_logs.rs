@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use coati_core::{Tool, ToolError, SystemLogProvider};
+use coati_core::{SystemLogProvider, Tool, ToolError};
 use schemars::JsonSchema;
 use serde::Deserialize;
 use serde_json::json;
@@ -14,7 +14,9 @@ pub struct QueryLogsInput {
     pub lines: u32,
 }
 
-fn default_lines() -> u32 { 50 }
+fn default_lines() -> u32 {
+    50
+}
 
 pub struct QueryLogsTool {
     provider: Arc<dyn SystemLogProvider>,
@@ -30,10 +32,13 @@ impl QueryLogsTool {
 impl Tool for QueryLogsTool {
     type Input = QueryLogsInput;
     const NAME: &'static str = "query_logs";
-    const DESCRIPTION: &'static str = "Fetch recent log lines for a service unit. Use when diagnosing service failures.";
+    const DESCRIPTION: &'static str =
+        "Fetch recent log lines for a service unit. Use when diagnosing service failures.";
 
     async fn call(&self, input: QueryLogsInput) -> Result<serde_json::Value, ToolError> {
-        let lines = self.provider.query_unit_logs(&input.unit, input.lines)
+        let lines = self
+            .provider
+            .query_unit_logs(&input.unit, input.lines)
             .await
             .map_err(|e| ToolError::Execution(e.to_string()))?;
 
@@ -56,8 +61,14 @@ mod tests {
 
     #[async_trait]
     impl SystemLogProvider for FakeProvider {
-        async fn query_unit_logs(&self, unit: &str, _lines: u32) -> Result<Vec<String>, SystemLogError> {
-            if unit == "bad" { return Err(SystemLogError::InvalidUnitName(unit.into())); }
+        async fn query_unit_logs(
+            &self,
+            unit: &str,
+            _lines: u32,
+        ) -> Result<Vec<String>, SystemLogError> {
+            if unit == "bad" {
+                return Err(SystemLogError::InvalidUnitName(unit.into()));
+            }
             Ok(self.lines.clone())
         }
     }
@@ -68,10 +79,16 @@ mod tests {
             lines: vec!["line1".into(), "line2".into()],
         });
         let tool = QueryLogsTool::new(provider);
-        let out = tool.call(serde_json::from_value(json!({
-            "unit": "nginx.service",
-            "lines": 10
-        })).unwrap()).await.unwrap();
+        let out = tool
+            .call(
+                serde_json::from_value(json!({
+                    "unit": "nginx.service",
+                    "lines": 10
+                }))
+                .unwrap(),
+            )
+            .await
+            .unwrap();
 
         let lines = out["lines"].as_array().unwrap();
         assert_eq!(lines.len(), 2);
@@ -81,10 +98,15 @@ mod tests {
     async fn propagates_provider_errors() {
         let provider = Arc::new(FakeProvider { lines: vec![] });
         let tool = QueryLogsTool::new(provider);
-        let result = tool.call(serde_json::from_value(json!({
-            "unit": "bad",
-            "lines": 10
-        })).unwrap()).await;
+        let result = tool
+            .call(
+                serde_json::from_value(json!({
+                    "unit": "bad",
+                    "lines": 10
+                }))
+                .unwrap(),
+            )
+            .await;
 
         assert!(result.is_err());
     }

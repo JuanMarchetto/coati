@@ -38,7 +38,14 @@ impl SystemLogProvider for LinuxJournalLogProvider {
         let lines = lines.min(500);
 
         let out = tokio::process::Command::new("journalctl")
-            .args(["-u", unit, "-n", &lines.to_string(), "--no-pager", "--output=short"])
+            .args([
+                "-u",
+                unit,
+                "-n",
+                &lines.to_string(),
+                "--no-pager",
+                "--output=short",
+            ])
             .output()
             .await
             .map_err(|e| SystemLogError::QueryFailed(format!("journalctl: {e}")))?;
