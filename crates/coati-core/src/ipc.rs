@@ -36,6 +36,11 @@ pub enum Request {
         #[serde(default)]
         context: ShellContext,
     },
+    AskStream {
+        question: String,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        conversation_id: Option<String>,
+    },
 }
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -54,6 +59,12 @@ pub enum Response {
         text: String,
         #[serde(default, skip_serializing_if = "Option::is_none")]
         fix: Option<String>,
+    },
+    Chunk {
+        delta: String,
+    },
+    StreamEnd {
+        full_content: String,
     },
     Error {
         message: String,
@@ -98,5 +109,36 @@ mod tests {
         let parsed: ShellContext = serde_json::from_str(&s).unwrap();
         assert_eq!(parsed.pwd, ctx.pwd);
         assert_eq!(parsed.last_exit, Some(2));
+    }
+
+    #[test]
+    fn serializes_ask_stream_request() {
+        let req = Request::AskStream {
+            question: "what is my disk usage".into(),
+            conversation_id: Some("c-1".into()),
+        };
+        let s = serde_json::to_string(&req).unwrap();
+        assert!(s.contains("\"type\":\"ask_stream\""));
+        assert!(s.contains("\"conversation_id\":\"c-1\""));
+    }
+
+    #[test]
+    fn deserializes_chunk_response() {
+        let s = r#"{"type":"chunk","delta":"hello"}"#;
+        let r: Response = serde_json::from_str(s).unwrap();
+        match r {
+            Response::Chunk { delta } => assert_eq!(delta, "hello"),
+            _ => panic!("wrong variant"),
+        }
+    }
+
+    #[test]
+    fn deserializes_stream_end_response() {
+        let s = r#"{"type":"stream_end","full_content":"hello world"}"#;
+        let r: Response = serde_json::from_str(s).unwrap();
+        match r {
+            Response::StreamEnd { full_content } => assert_eq!(full_content, "hello world"),
+            _ => panic!("wrong variant"),
+        }
     }
 }

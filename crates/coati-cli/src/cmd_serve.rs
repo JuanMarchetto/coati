@@ -52,6 +52,12 @@ pub async fn run(socket_path: &str) -> anyhow::Result<()> {
                     Request::Propose { .. } | Request::Explain { .. } => Response::Error {
                         message: "not implemented yet".into(),
                     },
+                    Request::AskStream { .. } => {
+                        // handled in Phase 3 Task 4
+                        Response::Error {
+                            message: "streaming not yet enabled".into(),
+                        }
+                    }
                 }
             })
         })
