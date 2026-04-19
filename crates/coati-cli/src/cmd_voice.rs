@@ -1,5 +1,6 @@
 use anyhow::{anyhow, Result};
 use coati_voice::model::{self, MODELS};
+use coati_voice::transcribe::Transcriber;
 use std::io::{self, BufRead, Write};
 
 pub async fn setup(model_name: &str, yes: bool) -> Result<()> {
@@ -57,14 +58,11 @@ pub async fn transcribe_file(path: &std::path::Path, model_name: &str) -> Result
             spec.name
         ));
     }
-    let _samples = load_wav_mono16k(path)?;
-    // Task 5 makes this functional.
-    // When Task 5 lands, replace this error with:
-    //   let t = coati_voice::transcribe::Transcriber::new(&model_path)?;
-    //   let text = t.transcribe(&_samples)?;
-    //   println!("{}", text);
-    eprintln!("transcribe: not yet wired — Task 5 lands this");
-    std::process::exit(1);
+    let samples = load_wav_mono16k(path)?;
+    let t = Transcriber::new(&model_path)?;
+    let text = t.transcribe(&samples)?;
+    println!("{}", text);
+    Ok(())
 }
 
 fn load_wav_mono16k(path: &std::path::Path) -> Result<Vec<f32>> {
