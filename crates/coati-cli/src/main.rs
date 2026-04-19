@@ -7,9 +7,9 @@ mod cmd_model;
 mod cmd_propose;
 mod cmd_serve;
 mod cmd_setup;
-mod ipc;
 #[cfg(feature = "voice")]
 mod cmd_voice;
+mod ipc;
 
 #[derive(Parser)]
 #[command(name = "coati", version, about = "Your Linux copilot.")]
@@ -156,7 +156,9 @@ async fn main() -> anyhow::Result<()> {
         #[cfg(feature = "voice")]
         Commands::Voice { action } => match action {
             VoiceAction::Setup { model, yes } => cmd_voice::setup(&model, yes).await,
-            VoiceAction::Transcribe { path, model } => cmd_voice::transcribe_file(&path, &model).await,
+            VoiceAction::Transcribe { path, model } => {
+                cmd_voice::transcribe_file(&path, &model).await
+            }
         },
     }
 }

@@ -9,11 +9,18 @@ pub async fn setup(model_name: &str, yes: bool) -> Result<()> {
 
     let dest = model::model_path(spec.name);
     if dest.is_file() {
-        println!("Model {} already installed at {}", spec.name, dest.display());
+        println!(
+            "Model {} already installed at {}",
+            spec.name,
+            dest.display()
+        );
         return Ok(());
     }
 
-    println!("Would download {} (~{} MB) from {}", spec.name, spec.size_mb, spec.url);
+    println!(
+        "Would download {} (~{} MB) from {}",
+        spec.name, spec.size_mb, spec.url
+    );
     println!("  -> {}", dest.display());
     println!("Audio and transcripts stay local. This download is the only network call.");
 
@@ -48,8 +55,8 @@ pub async fn setup(model_name: &str, yes: bool) -> Result<()> {
 }
 
 pub async fn transcribe_file(path: &std::path::Path, model_name: &str) -> Result<()> {
-    let spec = model::lookup(model_name)
-        .ok_or_else(|| anyhow!("unknown model '{}'", model_name))?;
+    let spec =
+        model::lookup(model_name).ok_or_else(|| anyhow!("unknown model '{}'", model_name))?;
     let model_path = model::model_path(spec.name);
     if !model_path.is_file() {
         return Err(anyhow!(
@@ -96,9 +103,5 @@ fn load_wav_mono16k(path: &std::path::Path) -> Result<Vec<f32>> {
 }
 
 fn known_models() -> String {
-    MODELS
-        .iter()
-        .map(|m| m.name)
-        .collect::<Vec<_>>()
-        .join(", ")
+    MODELS.iter().map(|m| m.name).collect::<Vec<_>>().join(", ")
 }

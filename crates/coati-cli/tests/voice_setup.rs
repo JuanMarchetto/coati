@@ -8,5 +8,7 @@ fn voice_setup_no_accept_prints_help() {
     cmd.args(["voice", "setup", "--model", "tiny.en"]);
     // No --yes, so it should print a prompt banner and exit 1 for a non-TTY stdin.
     let output = cmd.assert();
-    output.failure().stdout(predicates::str::contains("Would download"));
+    output
+        .failure()
+        .stdout(predicates::str::contains("Would download"));
 }

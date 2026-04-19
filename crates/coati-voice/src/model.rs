@@ -157,7 +157,10 @@ mod tests {
             .await
             .unwrap_err();
         assert!(err.to_string().contains("SHA-256 mismatch"));
-        assert!(!dest.exists(), "partial file must not be promoted on mismatch");
+        assert!(
+            !dest.exists(),
+            "partial file must not be promoted on mismatch"
+        );
     }
 
     #[tokio::test]

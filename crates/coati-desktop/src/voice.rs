@@ -3,7 +3,7 @@
 use anyhow::Result;
 use std::path::PathBuf;
 use std::sync::Arc;
-use tauri::{AppHandle, Emitter, Manager};
+use tauri::{AppHandle, Emitter, Manager, Runtime};
 use tokio::sync::Mutex;
 
 use coati_voice::capture::PushToTalk;
@@ -23,7 +23,12 @@ struct Inner {
 }
 
 impl VoiceState {
-    pub async fn on_press(&self, app: &AppHandle, model_name: &str, language: &str) -> Result<()> {
+    pub async fn on_press<R: Runtime>(
+        &self,
+        app: &AppHandle<R>,
+        model_name: &str,
+        language: &str,
+    ) -> Result<()> {
         let mut g = self.inner.lock().await;
         if g.recording.is_some() {
             return Ok(());
@@ -45,7 +50,7 @@ impl VoiceState {
         Ok(())
     }
 
-    pub async fn on_release(&self, app: &AppHandle) -> Result<()> {
+    pub async fn on_release<R: Runtime>(&self, app: &AppHandle<R>) -> Result<()> {
         let mut g = self.inner.lock().await;
         let Some(ptt) = g.recording.take() else {
             return Ok(());
@@ -71,7 +76,7 @@ impl VoiceState {
     }
 }
 
-pub fn voice_config(app: &AppHandle) -> (String, String) {
+pub fn voice_config<R: Runtime>(app: &AppHandle<R>) -> (String, String) {
     use coati_desktop::AppState;
     let state = app.state::<AppState>();
     let cfg = state.config.voice.clone().unwrap_or_default();

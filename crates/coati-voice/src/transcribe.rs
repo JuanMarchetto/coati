@@ -45,7 +45,10 @@ impl Transcriber {
         params.set_translate(false);
         params.set_n_threads(num_cpus_default());
 
-        let ctx = self.ctx.lock().map_err(|_| anyhow!("whisper ctx poisoned"))?;
+        let ctx = self
+            .ctx
+            .lock()
+            .map_err(|_| anyhow!("whisper ctx poisoned"))?;
         // create_state returns Result<WhisperState, WhisperError> in 0.13
         let mut state = ctx
             .create_state()
