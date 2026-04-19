@@ -165,3 +165,45 @@ function newConversation() {
 }
 
 document.addEventListener("DOMContentLoaded", boot);
+
+(() => {
+  const banner = document.getElementById("rec-banner");
+  const input = document.getElementById("input");
+  const sendBtn = document.getElementById("send");
+
+  if (!window.__TAURI__ || !banner) return;
+  const { listen } = window.__TAURI__.event;
+
+  function setBanner(text) {
+    while (banner.firstChild) banner.removeChild(banner.firstChild);
+    const dot = document.createElement("span");
+    dot.className = "dot";
+    banner.appendChild(dot);
+    banner.appendChild(document.createTextNode(" " + text));
+    banner.hidden = false;
+  }
+
+  listen("voice://recording", () => {
+    setBanner("Listening\u2026 release F9 to send");
+    if (input) input.disabled = true;
+  });
+
+  listen("voice://transcribing", () => {
+    setBanner("Transcribing\u2026");
+  });
+
+  listen("voice://idle", () => {
+    banner.hidden = true;
+    if (input) input.disabled = false;
+  });
+
+  listen("voice://final", (event) => {
+    const text = (event.payload && event.payload.text) || "";
+    if (!text.trim()) return;
+    if (input) {
+      input.disabled = false;
+      input.value = text;
+      if (sendBtn) sendBtn.click();
+    }
+  });
+})();

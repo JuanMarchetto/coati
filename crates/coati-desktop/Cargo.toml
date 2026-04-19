@@ -18,13 +18,21 @@ required-features = ["desktop"]
 
 [features]
 default = []
-desktop = ["dep:tauri", "dep:tauri-plugin-global-shortcut"]
+desktop = [
+    "dep:tauri",
+    "dep:tauri-plugin-global-shortcut",
+]
+voice = [
+    "desktop",
+    "dep:coati-voice",
+]
 
 [build-dependencies]
 tauri-build = { workspace = true }
 
 [dependencies]
 coati-core = { path = "../coati-core" }
+coati-voice = { path = "../coati-voice", optional = true }
 tauri = { workspace = true, optional = true }
 tauri-plugin-global-shortcut = { workspace = true, optional = true }
 serde = { workspace = true }

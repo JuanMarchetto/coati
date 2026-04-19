@@ -124,3 +124,26 @@ body.settings label { display: flex; flex-direction: column; gap: 4px; font-size
 body.settings input { padding: 6px 8px; background: var(--surface); color: var(--cream); border: 1px solid var(--dim); border-radius: 4px; font-family: 'Plex Mono'; }
 body.settings button { padding: 8px; background: var(--forest); color: var(--ink); border: none; border-radius: 4px; cursor: pointer; }
 body.settings .hint { color: var(--dim); font-size: 11px; }
+
+#rec-banner {
+  background: #6AA07F;
+  color: #1A130E;
+  padding: 6px 10px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+#rec-banner[hidden] { display: none; }
+#rec-banner .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #E67347;
+  animation: coati-pulse 1s infinite ease-in-out;
+}
+@keyframes coati-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}

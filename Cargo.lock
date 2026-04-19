@@ -630,6 +630,7 @@ version = "0.0.1"
 dependencies = [
  "anyhow",
  "coati-core",
+ "coati-voice",
  "dirs 5.0.1",
  "reqwest",
  "serde",

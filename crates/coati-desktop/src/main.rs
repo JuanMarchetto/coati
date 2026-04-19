@@ -8,6 +8,8 @@ mod commands;
 mod shortcut;
 mod stream;
 mod tray;
+#[cfg(feature = "voice")]
+mod voice;
 
 fn main() {
     tracing_subscriber::fmt::init();
@@ -38,6 +40,24 @@ fn main() {
                     "failed to register hotkey {hotkey}: {e}; falling back to Ctrl+Space"
                 );
                 let _ = shortcut::register(app.handle(), "Ctrl+Space");
+            }
+            #[cfg(feature = "voice")]
+            {
+                app.manage(voice::VoiceState::default());
+                let voice_hotkey = {
+                    let state = app.state::<AppState>();
+                    state
+                        .config
+                        .voice
+                        .as_ref()
+                        .filter(|v| v.enabled)
+                        .map(|v| v.hotkey.clone())
+                };
+                if let Some(vhk) = voice_hotkey {
+                    if let Err(e) = shortcut::register_voice(app.handle(), &vhk) {
+                        tracing::warn!("failed to register voice hotkey {vhk}: {e}");
+                    }
+                }
             }
             let app_for_listen = app.handle().clone();
             app.listen_any("coati://open-settings", move |_ev| {
