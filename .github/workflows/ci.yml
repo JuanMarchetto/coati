@@ -9,8 +9,18 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+      - name: Install system deps (audio + whisper)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libasound2-dev \
+            clang \
+            libclang-dev \
+            cmake \
+            pkg-config
       - uses: dtolnay/rust-toolchain@stable
         with:
+          toolchain: "1.82"
           components: rustfmt, clippy
       - uses: Swatinem/rust-cache@v2
       - run: cargo fmt --all -- --check
@@ -41,7 +51,11 @@ jobs:
             libayatana-appindicator3-dev \
             librsvg2-dev \
             libssl-dev \
-            pkg-config
+            pkg-config \
+            libasound2-dev \
+            clang \
+            libclang-dev \
+            cmake
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: "1.82"
@@ -50,3 +64,32 @@ jobs:
         run: cargo build -p coati-desktop --release --features desktop
       - name: Run coati-desktop tests
         run: cargo test -p coati-desktop --features desktop
+      - name: Build coati-desktop with voice
+        run: cargo build -p coati-desktop --release --features voice
+      - name: Test coati-desktop with voice feature
+        run: cargo test -p coati-desktop --features voice
+
+  voice:
+    name: voice
+    runs-on: ubuntu-24.04
+    needs: check
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install system deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libasound2-dev \
+            clang \
+            libclang-dev \
+            cmake \
+            pkg-config
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: "1.82"
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+      - name: cargo test
+        run: cargo test -p coati-voice
+      - name: cargo clippy
+        run: cargo clippy -p coati-voice -- -D warnings
