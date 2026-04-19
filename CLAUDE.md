@@ -93,6 +93,8 @@ Demo gold: a 60-second video of voice → agent → `sudo systemctl restart ngin
 
 **Phase 2 (shell integration) shipped 2026-04-18** — zsh/bash/fish plugins, `coati <intent>` with confirm-before-sudo, `??` explain-last-error, bats tests, CI job. Next: Phase 3 (Tauri desktop tray + chat window).
 
+**Phase 4 (push-to-talk voice) shipped 2026-04-18** — F9 hold-to-talk in desktop chat via whisper-rs local transcription; models downloaded with SHA-256 verify; audio never leaves the machine. Next: Phase 5 (packaging + launch).
+
 ## Working with Claude in this repo
 
 - Treat this CLAUDE.md as the source of truth for product vision and scope.

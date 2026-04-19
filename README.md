@@ -77,3 +77,34 @@ coati-desktop &
 - Confirm-before-sudo for `PROPOSE:` commands from the model
 
 See [CLAUDE.md](CLAUDE.md) for product vision and [ROADMAP.md](ROADMAP.md) for the build plan.
+
+## Voice (push-to-talk, optional)
+
+Install with voice enabled:
+
+```sh
+./scripts/install-desktop.sh --with-voice
+```
+
+First run, download a model (audio and transcripts stay local — this is the only network call voice makes):
+
+```sh
+coati voice setup              # base.en (~148 MB, recommended)
+coati voice setup --model tiny.en  # smaller, faster, less accurate
+```
+
+Then hold **F9** in the chat window to talk, release to send.
+
+Change the hotkey via `[voice]` in `~/.config/coati/config.toml`:
+
+```toml
+[voice]
+enabled = true
+hotkey = "F9"
+model = "base.en"
+language = "en"
+```
+
+Restart Coati after editing config.
+
+**System deps** (Ubuntu/Debian): `sudo apt install libasound2 libwebkit2gtk-4.1-0`. Voice builds also require `clang libclang-dev cmake libasound2-dev` at build time.

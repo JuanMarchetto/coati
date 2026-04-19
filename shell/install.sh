@@ -77,3 +77,7 @@ else
   echo "Optional: install the desktop app with:"
   echo "  cargo build -p coati-desktop --release --features desktop && ./scripts/install-desktop.sh"
 fi
+
+echo ""
+echo "Tip: install the desktop app + voice PTT with:"
+echo "  ./scripts/install-desktop.sh --with-voice"

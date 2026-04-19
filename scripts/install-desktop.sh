@@ -4,6 +4,21 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
+FEATURES="desktop"
+for arg in "$@"; do
+  case "$arg" in
+    --with-voice) FEATURES="desktop,voice" ;;
+    --help|-h) cat <<EOF; exit 0 ;;
+Usage: install-desktop.sh [--with-voice]
+
+  --with-voice   Build with voice (PTT) feature enabled.
+EOF
+  esac
+done
+
+echo "Building coati-desktop with features: $FEATURES"
+cargo build -p coati-desktop --release --features "$FEATURES"
+
 BIN_SRC="$REPO_ROOT/target/release/coati-desktop"
 BIN_DST="$HOME/.local/bin/coati-desktop"
 

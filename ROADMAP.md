@@ -69,7 +69,7 @@
 
 ---
 
-## Phase 4 — Voice (Push-to-Talk MVP)
+## Phase 4 — Voice (Push-to-Talk MVP) — SHIPPED 2026-04-18
 
 **Duration:** week 7 (~5 working days)
 **Depends on:** Phase 3 (uses tray for indicator)
@@ -83,9 +83,9 @@
 - No wake word yet (v1.0 scope)
 
 **Checkpoint criteria:**
-- [ ] Hold F9, say "what's the disk usage", release → agent responds with disk usage
-- [ ] Latency from release-to-response-start: under 2s on a CPU-only mid-range laptop
-- [ ] Audio never leaves the machine (verify with netstat during testing)
+- [x] Hold F9, say "what's the disk usage", release → agent responds with disk usage
+- [x] Latency from release-to-response-start: under 2s on a CPU-only mid-range laptop
+- [x] Audio never leaves the machine (verify with netstat during testing)
 
 ---
 
