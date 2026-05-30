@@ -3,6 +3,7 @@ resolver = "2"
 members = [
     "crates/coati-core",
     "crates/coati-tools",
+    "crates/coati-mcp-server",
     "crates/coati-cli",
     "crates/coati-hw",
     "crates/coati-desktop",
